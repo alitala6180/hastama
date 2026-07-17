@@ -5,13 +5,15 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\PositionController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+
 
 
 Route::get('/', function () {
     return redirect()->route('dashboard');
 });
+
 
 
 Route::get('/dashboard', [
@@ -23,7 +25,10 @@ Route::get('/dashboard', [
 
 
 
+
+
 Route::middleware('auth')->group(function () {
+
 
 
     /*
@@ -32,11 +37,37 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
+
     Route::resource('employees', EmployeeController::class);
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Organization Management
+    |--------------------------------------------------------------------------
+    */
+
 
     Route::resource('departments', DepartmentController::class);
 
+
     Route::resource('positions', PositionController::class);
+
+
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | User Management
+    |--------------------------------------------------------------------------
+    */
+
+
+    Route::resource('users', UserController::class);
+
+
 
 
 
@@ -46,24 +77,33 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
+
     Route::get('/profile', [
         ProfileController::class,
         'edit'
-    ])->name('profile.edit');
+    ])
+    ->name('profile.edit');
+
 
 
     Route::patch('/profile', [
         ProfileController::class,
         'update'
-    ])->name('profile.update');
+    ])
+    ->name('profile.update');
+
 
 
     Route::delete('/profile', [
         ProfileController::class,
         'destroy'
-    ])->name('profile.destroy');
+    ])
+    ->name('profile.destroy');
+
+
 
 });
+
 
 
 require __DIR__.'/auth.php';
