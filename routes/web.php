@@ -6,6 +6,7 @@ use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\LeaveController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -25,9 +26,17 @@ Route::get('/dashboard', [
 
 
 
-
-
 Route::middleware('auth')->group(function () {
+
+    Route::patch(
+        '/leaves/{leave}/approve',
+        [LeaveController::class, 'approve']
+    )->name('leaves.approve');
+
+    Route::patch(
+        '/leaves/{leave}/reject',
+        [LeaveController::class, 'reject']
+    )->name('leaves.reject');
 
 
 
@@ -37,8 +46,17 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-
     Route::resource('employees', EmployeeController::class);
+
+
+
+    /*
+    |--------------------------------------------------------------------------
+    | Leave Management
+    |--------------------------------------------------------------------------
+    */
+
+    Route::resource('leaves', LeaveController::class);
 
 
 
@@ -48,13 +66,9 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-
     Route::resource('departments', DepartmentController::class);
 
-
     Route::resource('positions', PositionController::class);
-
-
 
 
 
@@ -64,10 +78,7 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-
     Route::resource('users', UserController::class);
-
-
 
 
 
@@ -77,28 +88,24 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-
     Route::get('/profile', [
         ProfileController::class,
         'edit'
-    ])
-    ->name('profile.edit');
+    ])->name('profile.edit');
 
 
 
     Route::patch('/profile', [
         ProfileController::class,
         'update'
-    ])
-    ->name('profile.update');
+    ])->name('profile.update');
 
 
 
     Route::delete('/profile', [
         ProfileController::class,
         'destroy'
-    ])
-    ->name('profile.destroy');
+    ])->name('profile.destroy');
 
 
 

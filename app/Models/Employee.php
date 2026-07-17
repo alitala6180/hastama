@@ -67,4 +67,9 @@ class Employee extends Model
     {
         return $this->first_name . ' ' . $this->last_name;
     }
+
+    public function leaves()
+    {
+        return $this->hasMany(Leave::class);
+    }
 }

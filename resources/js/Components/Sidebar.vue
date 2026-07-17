@@ -27,6 +27,11 @@ const menu = [
         route: 'positions.index',
         icon: '💼',
     },
+    {
+        title: 'مرخصی کارکنان',
+        route: 'leaves.index',
+        icon: '📅',
+    },
 ];
 
 function isActive(routeName: string) {
