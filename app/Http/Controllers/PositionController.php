@@ -2,63 +2,213 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Position;
+use App\Models\Department;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class PositionController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+
+    public function index(Request $request)
     {
-        //
+
+        $positions = Position::query()
+
+            ->with('department:id,name')
+
+            ->when($request->search, function ($query, $search) {
+
+                $query->where('name', 'like', "%{$search}%");
+
+            })
+
+            ->select([
+                'id',
+                'department_id',
+                'name',
+                'description',
+                'is_active',
+                'created_at',
+            ])
+
+            ->latest()
+
+            ->paginate(10)
+
+            ->withQueryString();
+
+
+
+        return Inertia::render('Positions/Index', [
+
+            'positions' => $positions,
+
+            'filters' => [
+                'search' => $request->search,
+            ],
+
+        ]);
+
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+
+
     public function create()
     {
-        //
+
+        return Inertia::render('Positions/Create', [
+
+            'departments' => Department::where('is_active', true)
+                ->select('id','name')
+                ->get(),
+
+        ]);
+
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
+
+
     public function store(Request $request)
     {
-        //
+
+        $validated = $request->validate([
+
+            'department_id' => [
+                'required',
+                'exists:departments,id'
+            ],
+
+            'name' => [
+                'required',
+                'string',
+                'max:255'
+            ],
+
+            'description' => [
+                'nullable',
+                'string'
+            ],
+
+            'is_active' => [
+                'boolean'
+            ],
+
+        ]);
+
+
+
+        Position::create($validated);
+
+
+
+        return redirect()
+            ->route('positions.index')
+            ->with('success','سمت شغلی با موفقیت ثبت شد');
+
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+
+
+
+
+    public function show(Position $position)
     {
-        //
+
+        $position->load('department');
+
+
+        return Inertia::render('Positions/Show',[
+
+            'position'=>$position
+
+        ]);
+
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+
+
+
+
+    public function edit(Position $position)
     {
-        //
+
+        return Inertia::render('Positions/Edit',[
+
+            'position'=>$position,
+
+
+            'departments'=>Department::where('is_active',true)
+                ->select('id','name')
+                ->get(),
+
+        ]);
+
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+
+
+
+
+    public function update(Request $request, Position $position)
     {
-        //
+
+
+        $validated=$request->validate([
+
+            'department_id'=>[
+                'required',
+                'exists:departments,id'
+            ],
+
+            'name'=>[
+                'required',
+                'string',
+                'max:255'
+            ],
+
+            'description'=>[
+                'nullable',
+                'string'
+            ],
+
+            'is_active'=>[
+                'boolean'
+            ],
+
+        ]);
+
+
+
+        $position->update($validated);
+
+
+
+        return redirect()
+            ->route('positions.index')
+            ->with('success','سمت شغلی بروزرسانی شد');
+
+
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+
+
+
+
+    public function destroy(Position $position)
     {
-        //
+
+
+        $position->delete();
+
+
+
+        return redirect()
+            ->route('positions.index')
+            ->with('success','سمت شغلی حذف شد');
+
+
     }
+
 }

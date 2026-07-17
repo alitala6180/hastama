@@ -8,6 +8,7 @@ import Header from '@/Components/Header.vue';
 
 <template>
 
+
 <div
     class="min-h-screen bg-gray-100"
     dir="rtl"
@@ -20,7 +21,9 @@ import Header from '@/Components/Header.vue';
     <Header />
 
 
+
     <main class="mr-72 pt-16">
+
 
 
         <header
@@ -39,6 +42,40 @@ import Header from '@/Components/Header.vue';
 
 
 
+
+
+        <!-- پیام موفقیت -->
+
+        <div
+            v-if="($page.props.flash as any)?.success"
+            class="mx-6 mt-6 rounded-lg bg-green-100 p-4 text-green-700 shadow"
+        >
+
+            {{ ($page.props.flash as any).success }}
+
+        </div>
+
+
+
+
+
+        <!-- پیام خطا -->
+
+        <div
+            v-if="($page.props.flash as any)?.error"
+            class="mx-6 mt-6 rounded-lg bg-red-100 p-4 text-red-700 shadow"
+        >
+
+            {{ ($page.props.flash as any).error }}
+
+        </div>
+
+
+
+
+
+
+
         <div class="p-6">
 
             <slot />
@@ -46,7 +83,9 @@ import Header from '@/Components/Header.vue';
         </div>
 
 
+
     </main>
+
 
 
 </div>
