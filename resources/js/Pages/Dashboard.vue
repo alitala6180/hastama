@@ -20,6 +20,7 @@ interface Employee {
     employee_code: string;
     first_name: string;
     last_name: string;
+    status: string;
     department?: Department;
     position?: Position;
 }
@@ -27,14 +28,23 @@ interface Employee {
 
 interface Stats {
     employees: number;
+    activeEmployees: number;
+    inactiveEmployees: number;
     departments: number;
     positions: number;
+}
+
+
+interface AuthUser {
+    name: string;
+    email: string;
 }
 
 
 defineProps<{
     stats: Stats;
     latestEmployees: Employee[];
+    authUser: AuthUser;
 }>();
 
 
@@ -43,182 +53,247 @@ defineProps<{
 
 <template>
 
-    <Head title="داشبورد" />
+<Head title="داشبورد" />
 
 
-    <AuthenticatedLayout>
+<AuthenticatedLayout>
 
-        <template #header>
 
-            <h2 class="text-xl font-semibold leading-tight text-gray-800">
-                داشبورد مدیریت هستما
-            </h2>
+<template #header>
 
-        </template>
+<h2 class="text-xl font-semibold text-gray-800">
+    داشبورد مدیریت هستما
+</h2>
 
+</template>
 
-        <div class="py-12">
 
-            <div class="mx-auto max-w-7xl sm:px-6 lg:px-8">
 
+<div class="space-y-6">
 
-                <!-- کارت های آماری -->
 
-                <div class="grid grid-cols-1 gap-6 md:grid-cols-3">
+<!-- Welcome -->
 
+<div class="rounded-lg bg-white p-6 shadow">
 
-                    <div class="rounded-lg bg-white p-6 shadow">
+    <h3 class="text-lg font-semibold text-gray-800">
+        خوش آمدید {{ authUser.name }}
+    </h3>
 
-                        <div class="text-sm text-gray-500">
-                            تعداد کارکنان
-                        </div>
+    <p class="mt-2 text-sm text-gray-500">
+        {{ authUser.email }}
+    </p>
 
-                        <div class="mt-2 text-3xl font-bold text-gray-900">
-                            {{ stats.employees }}
-                        </div>
+</div>
 
-                    </div>
 
 
+<!-- Statistics -->
 
-                    <div class="rounded-lg bg-white p-6 shadow">
 
-                        <div class="text-sm text-gray-500">
-                            واحدهای سازمانی
-                        </div>
+<div class="grid grid-cols-1 gap-6 md:grid-cols-5">
 
-                        <div class="mt-2 text-3xl font-bold text-gray-900">
-                            {{ stats.departments }}
-                        </div>
 
-                    </div>
+<div class="rounded-lg bg-white p-6 shadow">
 
+<p class="text-sm text-gray-500">
+کل پرسنل
+</p>
 
+<p class="mt-3 text-3xl font-bold">
+{{ stats.employees }}
+</p>
 
-                    <div class="rounded-lg bg-white p-6 shadow">
+</div>
 
-                        <div class="text-sm text-gray-500">
-                            سمت های شغلی
-                        </div>
 
-                        <div class="mt-2 text-3xl font-bold text-gray-900">
-                            {{ stats.positions }}
-                        </div>
 
-                    </div>
+<div class="rounded-lg bg-white p-6 shadow">
 
+<p class="text-sm text-gray-500">
+پرسنل فعال
+</p>
 
-                </div>
+<p class="mt-3 text-3xl font-bold text-green-600">
+{{ stats.activeEmployees }}
+</p>
 
+</div>
 
 
-                <!-- آخرین کارکنان -->
 
+<div class="rounded-lg bg-white p-6 shadow">
 
-                <div class="mt-8 overflow-hidden rounded-lg bg-white shadow">
+<p class="text-sm text-gray-500">
+پرسنل غیرفعال
+</p>
 
+<p class="mt-3 text-3xl font-bold text-red-600">
+{{ stats.inactiveEmployees }}
+</p>
 
-                    <div class="border-b p-6">
+</div>
 
-                        <h3 class="text-lg font-semibold text-gray-800">
-                            آخرین کارکنان ثبت شده
-                        </h3>
 
-                    </div>
 
+<div class="rounded-lg bg-white p-6 shadow">
 
+<p class="text-sm text-gray-500">
+واحد سازمانی
+</p>
 
-                    <div class="p-6">
+<p class="mt-3 text-3xl font-bold">
+{{ stats.departments }}
+</p>
 
+</div>
 
-                        <table class="w-full text-right">
 
 
-                            <thead>
+<div class="rounded-lg bg-white p-6 shadow">
 
-                                <tr class="border-b text-sm text-gray-500">
+<p class="text-sm text-gray-500">
+سمت شغلی
+</p>
 
-                                    <th class="pb-3">
-                                        کد پرسنلی
-                                    </th>
+<p class="mt-3 text-3xl font-bold">
+{{ stats.positions }}
+</p>
 
-                                    <th class="pb-3">
-                                        نام
-                                    </th>
+</div>
 
-                                    <th class="pb-3">
-                                        واحد
-                                    </th>
 
-                                    <th class="pb-3">
-                                        سمت
-                                    </th>
+</div>
 
-                                </tr>
 
-                            </thead>
 
 
+<!-- Latest Employees -->
 
-                            <tbody>
 
+<div class="overflow-hidden rounded-lg bg-white shadow">
 
-                                <tr
-                                    v-for="employee in latestEmployees"
-                                    :key="employee.id"
-                                    class="border-b"
-                                >
 
+<div class="border-b p-6">
 
-                                    <td class="py-3">
-                                        {{ employee.employee_code }}
-                                    </td>
+<h3 class="text-lg font-semibold text-gray-800">
+آخرین پرسنل ثبت شده
+</h3>
 
+</div>
 
-                                    <td class="py-3">
 
-                                        {{ employee.first_name }}
-                                        {{ employee.last_name }}
 
-                                    </td>
+<div class="overflow-x-auto p-6">
 
 
-                                    <td class="py-3">
+<table class="w-full text-right">
 
-                                        {{ employee.department?.name ?? '-' }}
 
-                                    </td>
+<thead>
 
+<tr class="border-b text-sm text-gray-500">
 
-                                    <td class="py-3">
+<th class="pb-3">
+کد پرسنلی
+</th>
 
-                                        {{ employee.position?.name ?? '-' }}
+<th class="pb-3">
+نام و نام خانوادگی
+</th>
 
-                                    </td>
+<th class="pb-3">
+واحد
+</th>
 
+<th class="pb-3">
+سمت
+</th>
 
-                                </tr>
+<th class="pb-3">
+وضعیت
+</th>
 
+</tr>
 
-                            </tbody>
+</thead>
 
 
-                        </table>
 
+<tbody>
 
-                    </div>
 
+<tr
+v-for="employee in latestEmployees"
+:key="employee.id"
+class="border-b"
+>
 
-                </div>
 
+<td class="py-3">
+{{ employee.employee_code }}
+</td>
 
-            </div>
 
 
-        </div>
+<td class="py-3">
+{{ employee.first_name }}
+{{ employee.last_name }}
+</td>
 
 
-    </AuthenticatedLayout>
+
+<td class="py-3">
+{{ employee.department?.name ?? '-' }}
+</td>
+
+
+
+<td class="py-3">
+{{ employee.position?.name ?? '-' }}
+</td>
+
+
+
+<td class="py-3">
+
+
+<span
+:class="
+employee.status === 'active'
+? 'text-green-600'
+: 'text-red-600'
+"
+>
+
+{{ employee.status === 'active' ? 'فعال' : 'غیرفعال' }}
+
+</span>
+
+
+</td>
+
+
+
+</tr>
+
+
+</tbody>
+
+
+</table>
+
+
+</div>
+
+
+</div>
+
+
+</div>
+
+
+</AuthenticatedLayout>
 
 
 </template>
