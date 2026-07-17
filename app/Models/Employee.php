@@ -72,4 +72,24 @@ class Employee extends Model
     {
         return $this->hasMany(Leave::class);
     }
+
+    public function usedLeaves()
+    {
+        return $this->hasMany(Leave::class)
+
+            ->where('status','approved')
+
+            ->where('type','annual');
+    }
+
+    public function getRemainingLeaveAttribute()
+    {
+        return
+
+            $this->annual_leave
+
+            -
+
+            $this->usedLeaves()->sum('days');
+    }
 }

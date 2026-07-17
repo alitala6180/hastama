@@ -71,27 +71,64 @@ class LeaveController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreLeaveRequest $request)
     {
 
-        $validated = $request->validate([
+        $employee = Employee::findOrFail(
 
-            'employee_id' => ['required','exists:employees,id'],
+            $request->employee_id
 
-            'type' => ['required'],
-
-            'from_date' => ['required','date'],
-
-            'to_date' => ['required','date','after_or_equal:from_date'],
-
-            'days' => ['required','integer','min:1'],
-
-            'reason' => ['nullable','string'],
-
-        ]);
+        );
 
 
-        Leave::create($validated);
+        $used = Leave::query()
+
+            ->where('employee_id',$employee->id)
+
+            ->where('status','approved')
+
+            ->where('type','annual')
+
+            ->sum('days');
+
+
+        $remaining =
+
+            $employee->annual_leave
+
+            -
+
+            $used;
+
+
+        if(
+
+            $request->type == 'annual'
+
+            &&
+
+            $request->days > $remaining
+
+        ){
+
+            return back()
+
+                ->withErrors([
+
+                    'days'=>
+
+                    'موجودی مرخصی کافی نیست.'
+
+                ]);
+
+        }
+
+
+        Leave::create(
+
+            $request->validated()
+
+        );
 
 
         return redirect()
@@ -99,8 +136,11 @@ class LeaveController extends Controller
             ->route('leaves.index')
 
             ->with(
+
                 'success',
-                'مرخصی با موفقیت ثبت شد'
+
+                'مرخصی ثبت شد.'
+
             );
 
     }

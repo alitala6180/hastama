@@ -2,18 +2,15 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head } from '@inertiajs/vue3';
 
-
 interface Department {
     id: number;
     name: string;
 }
 
-
 interface Position {
     id: number;
     name: string;
 }
-
 
 interface Employee {
     id: number;
@@ -21,10 +18,10 @@ interface Employee {
     first_name: string;
     last_name: string;
     status: string;
+    remaining_leave: number;
     department?: Department;
     position?: Position;
 }
-
 
 interface Stats {
     employees: number;
@@ -34,30 +31,23 @@ interface Stats {
     positions: number;
 }
 
-
 interface AuthUser {
     name: string;
     email: string;
 }
-
 
 defineProps<{
     stats: Stats;
     latestEmployees: Employee[];
     authUser: AuthUser;
 }>();
-
-
 </script>
-
 
 <template>
 
 <Head title="داشبورد" />
 
-
 <AuthenticatedLayout>
-
 
 <template #header>
 
@@ -67,10 +57,7 @@ defineProps<{
 
 </template>
 
-
-
 <div class="space-y-6">
-
 
 <!-- Welcome -->
 
@@ -86,13 +73,9 @@ defineProps<{
 
 </div>
 
-
-
 <!-- Statistics -->
 
-
 <div class="grid grid-cols-1 gap-6 md:grid-cols-5">
-
 
 <div class="rounded-lg bg-white p-6 shadow">
 
@@ -106,8 +89,6 @@ defineProps<{
 
 </div>
 
-
-
 <div class="rounded-lg bg-white p-6 shadow">
 
 <p class="text-sm text-gray-500">
@@ -119,8 +100,6 @@ defineProps<{
 </p>
 
 </div>
-
-
 
 <div class="rounded-lg bg-white p-6 shadow">
 
@@ -134,8 +113,6 @@ defineProps<{
 
 </div>
 
-
-
 <div class="rounded-lg bg-white p-6 shadow">
 
 <p class="text-sm text-gray-500">
@@ -147,8 +124,6 @@ defineProps<{
 </p>
 
 </div>
-
-
 
 <div class="rounded-lg bg-white p-6 shadow">
 
@@ -162,17 +137,11 @@ defineProps<{
 
 </div>
 
-
 </div>
-
-
-
 
 <!-- Latest Employees -->
 
-
 <div class="overflow-hidden rounded-lg bg-white shadow">
-
 
 <div class="border-b p-6">
 
@@ -182,13 +151,9 @@ defineProps<{
 
 </div>
 
-
-
 <div class="overflow-x-auto p-6">
 
-
 <table class="w-full text-right">
-
 
 <thead>
 
@@ -211,6 +176,10 @@ defineProps<{
 </th>
 
 <th class="pb-3">
+مانده مرخصی
+</th>
+
+<th class="pb-3">
 وضعیت
 </th>
 
@@ -218,82 +187,74 @@ defineProps<{
 
 </thead>
 
-
-
 <tbody>
-
 
 <tr
 v-for="employee in latestEmployees"
 :key="employee.id"
-class="border-b"
+class="border-b hover:bg-gray-50 transition"
 >
-
 
 <td class="py-3">
 {{ employee.employee_code }}
 </td>
-
-
 
 <td class="py-3">
 {{ employee.first_name }}
 {{ employee.last_name }}
 </td>
 
-
-
 <td class="py-3">
 {{ employee.department?.name ?? '-' }}
 </td>
-
-
 
 <td class="py-3">
 {{ employee.position?.name ?? '-' }}
 </td>
 
-
-
 <td class="py-3">
 
-
 <span
-:class="
-employee.status === 'active'
-? 'text-green-600'
-: 'text-red-600'
-"
+class="rounded bg-blue-100 px-3 py-1 text-blue-700"
 >
 
-{{ employee.status === 'active' ? 'فعال' : 'غیرفعال' }}
+{{ employee.remaining_leave }}
+
+روز
 
 </span>
 
+</td>
+
+<td class="py-3">
+
+<span
+:class="employee.status === 'active'
+? 'rounded bg-green-100 px-3 py-1 text-green-700'
+: 'rounded bg-red-100 px-3 py-1 text-red-700'"
+>
+
+{{ employee.status === 'active'
+? 'فعال'
+: 'غیرفعال'
+}}
+
+</span>
 
 </td>
 
-
-
 </tr>
-
 
 </tbody>
 
-
 </table>
 
+</div>
 
 </div>
 
-
 </div>
-
-
-</div>
-
 
 </AuthenticatedLayout>
-
 
 </template>

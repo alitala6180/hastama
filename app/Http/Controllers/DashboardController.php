@@ -36,28 +36,48 @@ class DashboardController extends Controller
 
 
             'latestEmployees' => Employee::with([
+
                 'department:id,name',
+
                 'position:id,name',
+
             ])
 
             ->select([
+
                 'id',
+
                 'employee_code',
+
                 'first_name',
+
                 'last_name',
+
                 'department_id',
+
                 'position_id',
+
                 'status',
+
+                'annual_leave',
+
             ])
 
             ->latest()
+
             ->take(5)
-            ->get(),
+
+            ->get()
+
+            ->append('remaining_leave'),
 
 
             'authUser' => [
+
                 'name' => auth()->user()->name,
+
                 'email' => auth()->user()->email,
+
             ],
 
         ]);
