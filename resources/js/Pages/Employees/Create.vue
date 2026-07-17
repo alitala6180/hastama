@@ -39,30 +39,7 @@ const form = useForm({
 
 function submit() {
 
-    console.log('submit clicked');
-
-    form.post(route('employees.store'), {
-
-        onStart: () => {
-            console.log('request started');
-        },
-
-
-        onSuccess: () => {
-            console.log('saved successfully');
-        },
-
-
-        onError: (errors) => {
-            console.log('validation errors:', errors);
-        },
-
-
-        onFinish: () => {
-            console.log('request finished');
-        }
-
-    });
+    form.post(route('employees.store'));
 
 }
 
