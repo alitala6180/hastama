@@ -2,63 +2,243 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Department;
 use Illuminate\Http\Request;
+use Inertia\Inertia;
 
 class DepartmentController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+
+    public function index(Request $request)
     {
-        //
+
+        $departments = Department::query()
+
+            ->when($request->search, function ($query, $search) {
+
+                $query->where(function ($q) use ($search) {
+
+                    $q->where('name', 'like', "%{$search}%")
+                      ->orWhere('code', 'like', "%{$search}%");
+
+                });
+
+            })
+
+
+            ->select([
+                'id',
+                'name',
+                'code',
+                'description',
+                'is_active',
+                'created_at'
+            ])
+
+
+            ->latest()
+
+            ->paginate(10)
+
+            ->withQueryString();
+
+
+
+        return Inertia::render('Departments/Index', [
+
+            'departments' => $departments,
+
+
+            'filters' => [
+                'search' => $request->search,
+            ]
+
+        ]);
+
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
+
+
     public function create()
     {
-        //
+
+        return Inertia::render('Departments/Create');
+
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
+
+
     public function store(Request $request)
     {
-        //
+
+        $validated = $request->validate([
+
+            'name' => [
+                'required',
+                'string',
+                'max:255'
+            ],
+
+
+            'code' => [
+                'required',
+                'string',
+                'max:50',
+                'unique:departments,code'
+            ],
+
+
+            'description' => [
+                'nullable',
+                'string'
+            ],
+
+
+            'is_active' => [
+                'boolean'
+            ],
+
+        ]);
+
+
+
+        Department::create($validated);
+
+
+
+        return redirect()
+
+            ->route('departments.index')
+
+            ->with(
+                'success',
+                'واحد سازمانی با موفقیت ثبت شد'
+            );
+
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+
+
+
+    public function show(Department $department)
     {
-        //
+
+        return Inertia::render('Departments/Show', [
+
+            'department' => $department
+
+        ]);
+
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
+
+
+
+    public function edit(Department $department)
     {
-        //
+
+        return Inertia::render('Departments/Edit', [
+
+            'department' => $department
+
+        ]);
+
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+
+
+
+
+    public function update(Request $request, Department $department)
     {
-        //
+
+
+        $validated = $request->validate([
+
+
+            'name' => [
+                'required',
+                'string',
+                'max:255'
+            ],
+
+
+            'code' => [
+                'required',
+                'string',
+                'max:50',
+                'unique:departments,code,' . $department->id
+            ],
+
+
+            'description' => [
+                'nullable',
+                'string'
+            ],
+
+
+            'is_active' => [
+                'boolean'
+            ],
+
+
+        ]);
+
+
+
+        $department->update($validated);
+
+
+
+        return redirect()
+
+            ->route('departments.index')
+
+            ->with(
+                'success',
+                'واحد سازمانی بروزرسانی شد'
+            );
+
+
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+
+
+
+
+    public function destroy(Department $department)
     {
-        //
+
+
+        if($department->employees()->exists())
+        {
+
+            return back()
+
+                ->with(
+                    'error',
+                    'این واحد دارای پرسنل است و قابل حذف نیست'
+                );
+
+        }
+
+
+
+        $department->delete();
+
+
+
+        return redirect()
+
+            ->route('departments.index')
+
+            ->with(
+                'success',
+                'واحد سازمانی حذف شد'
+            );
+
+
     }
+
+
 }
