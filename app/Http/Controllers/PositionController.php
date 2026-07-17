@@ -198,16 +198,21 @@ class PositionController extends Controller
 
     public function destroy(Position $position)
     {
+        if ($position->employees()->count() > 0) {
+
+            return redirect()
+                ->route('positions.index')
+                ->with('error', 'این سمت دارای پرسنل است و امکان حذف آن وجود ندارد');
+
+        }
 
 
         $position->delete();
 
 
-
         return redirect()
             ->route('positions.index')
-            ->with('success','سمت شغلی حذف شد');
-
+            ->with('success', 'سمت شغلی با موفقیت حذف شد');
 
     }
 

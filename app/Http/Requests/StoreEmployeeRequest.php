@@ -71,7 +71,7 @@ class StoreEmployeeRequest extends FormRequest
 
 
             'status' => [
-                'required',
+                'nullable',
                 'in:active,inactive',
             ],
 
