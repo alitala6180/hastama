@@ -22,14 +22,12 @@ class Employee extends Model
         'national_code',
         'mobile',
         'hire_date',
-        'is_active',
         'status',
     ];
 
 
     protected $casts = [
         'hire_date' => 'date',
-        'is_active' => 'boolean',
     ];
 
 
@@ -91,5 +89,10 @@ class Employee extends Model
             -
 
             $this->usedLeaves()->sum('days');
+    }
+
+    public function attendances()
+    {
+        return $this->hasMany(Attendance::class);
     }
 }

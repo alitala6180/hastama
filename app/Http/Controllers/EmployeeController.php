@@ -88,6 +88,7 @@ class EmployeeController extends Controller
 
     public function store(StoreEmployeeRequest $request)
     {
+        abort_unless($request->user()->can('employees.create'), 403);
 
         Employee::create(
             $request->validated()
@@ -146,6 +147,7 @@ class EmployeeController extends Controller
 
     public function update(UpdateEmployeeRequest $request, Employee $employee)
     {
+        abort_unless($request->user()->can('employees.edit'), 403);
 
         $employee->update(
             $request->validated()
@@ -162,6 +164,7 @@ class EmployeeController extends Controller
 
     public function destroy(Employee $employee)
     {
+        abort_unless(request()->user()->can('employees.delete'), 403);
 
         $employee->delete();
 

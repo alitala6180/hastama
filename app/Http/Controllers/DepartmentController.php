@@ -70,6 +70,7 @@ class DepartmentController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless($request->user()->can('departments.manage'), 403);
 
         $validated = $request->validate([
 
@@ -151,6 +152,7 @@ class DepartmentController extends Controller
 
     public function update(Request $request, Department $department)
     {
+        abort_unless($request->user()->can('departments.manage'), 403);
 
 
         $validated = $request->validate([
@@ -208,6 +210,7 @@ class DepartmentController extends Controller
 
     public function destroy(Department $department)
     {
+        abort_unless(request()->user()->can('departments.manage'), 403);
 
 
         if($department->employees()->exists())

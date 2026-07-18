@@ -72,6 +72,7 @@ class PositionController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless($request->user()->can('positions.manage'), 403);
 
         $validated = $request->validate([
 
@@ -153,6 +154,7 @@ class PositionController extends Controller
 
     public function update(Request $request, Position $position)
     {
+        abort_unless($request->user()->can('positions.manage'), 403);
 
 
         $validated=$request->validate([
@@ -198,6 +200,7 @@ class PositionController extends Controller
 
     public function destroy(Position $position)
     {
+        abort_unless(request()->user()->can('positions.manage'), 403);
         if ($position->employees()->count() > 0) {
 
             return redirect()

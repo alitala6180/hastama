@@ -25,6 +25,7 @@ class RolePermissionSeeder extends Seeder
             'users.create',
             'users.edit',
             'users.delete',
+            'roles.manage',
 
 
             // پرسنل
@@ -63,7 +64,7 @@ class RolePermissionSeeder extends Seeder
 
         foreach ($permissions as $permission) {
 
-            Permission::create([
+            Permission::firstOrCreate([
                 'name' => $permission,
                 'guard_name' => 'web',
             ]);
@@ -79,19 +80,19 @@ class RolePermissionSeeder extends Seeder
         */
 
 
-        $admin = Role::create([
+        $admin = Role::firstOrCreate([
             'name' => 'admin',
             'guard_name' => 'web',
         ]);
 
 
-        $hr = Role::create([
+        $hr = Role::firstOrCreate([
             'name' => 'hr_manager',
             'guard_name' => 'web',
         ]);
 
 
-        $employee = Role::create([
+        $employee = Role::firstOrCreate([
             'name' => 'employee',
             'guard_name' => 'web',
         ]);

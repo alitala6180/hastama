@@ -1,14 +1,2 @@
-<script setup lang="ts">
-</script>
-
-<template>
-
-<div class="p-6">
-
-    <h1 class="text-2xl font-bold">
-        در حال ساخت...
-    </h1>
-
-</div>
-
-</template>
+<script setup lang="ts">import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'; import { Head, useForm } from '@inertiajs/vue3'; const props=defineProps<{permissions:{id:number;name:string}[]}>(); const form=useForm({name:'',permissions:[] as string[]});</script>
+<template><Head title="نقش جدید"/><AuthenticatedLayout><template #header><h2 class="text-xl font-semibold">نقش جدید</h2></template><form class="max-w-2xl space-y-5 rounded-lg bg-white p-6 shadow" @submit.prevent="form.post(route('roles.store'))"><div><label class="mb-1 block">نام نقش</label><input v-model="form.name" class="w-full rounded border p-2"/><p v-if="form.errors.name" class="text-sm text-red-600">{{form.errors.name}}</p></div><div><p class="mb-2">دسترسی‌ها</p><label v-for="permission in props.permissions" :key="permission.id" class="mb-2 flex items-center gap-2"><input v-model="form.permissions" :value="permission.name" type="checkbox"/>{{permission.name}}</label></div><button class="rounded bg-blue-600 px-5 py-2 text-white">ایجاد نقش</button></form></AuthenticatedLayout></template>

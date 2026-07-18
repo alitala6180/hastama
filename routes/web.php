@@ -7,6 +7,8 @@ use App\Http\Controllers\DepartmentController;
 use App\Http\Controllers\PositionController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\LeaveController;
+use App\Http\Controllers\AttendanceController;
+use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -14,8 +16,6 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return redirect()->route('dashboard');
 });
-
-
 
 Route::get('/dashboard', [
     DashboardController::class,
@@ -27,6 +27,14 @@ Route::get('/dashboard', [
 
 
 Route::middleware('auth')->group(function () {
+
+    Route::post('attendances/{employee}/check-in', [AttendanceController::class, 'checkIn'])
+        ->middleware('permission:attendance.manage')
+        ->name('attendances.checkIn');
+
+    Route::post('attendances/{employee}/check-out', [AttendanceController::class, 'checkOut'])
+        ->middleware('permission:attendance.manage')
+        ->name('attendances.checkOut');
 
     Route::patch(
         '/leaves/{leave}/approve',
@@ -46,7 +54,8 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::resource('employees', EmployeeController::class);
+    Route::resource('employees', EmployeeController::class)
+        ->middleware('permission:employees.view|employees.create|employees.edit|employees.delete');
 
 
 
@@ -56,7 +65,9 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::resource('leaves', LeaveController::class);
+    Route::resource('leaves', LeaveController::class)
+        ->only(['index', 'create', 'store'])
+        ->middleware('permission:leave.view|leave.manage');
 
 
 
@@ -66,9 +77,11 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::resource('departments', DepartmentController::class);
+    Route::resource('departments', DepartmentController::class)
+        ->middleware('permission:departments.view|departments.manage');
 
-    Route::resource('positions', PositionController::class);
+    Route::resource('positions', PositionController::class)
+        ->middleware('permission:positions.view|positions.manage');
 
 
 
@@ -78,7 +91,13 @@ Route::middleware('auth')->group(function () {
     |--------------------------------------------------------------------------
     */
 
-    Route::resource('users', UserController::class);
+    Route::resource('users', UserController::class)
+        ->except('show')
+        ->middleware('permission:users.view|users.create|users.edit|users.delete');
+
+    Route::resource('roles', RoleController::class)
+        ->except(['show', 'destroy'])
+        ->middleware('permission:roles.manage');
 
 
 
@@ -107,7 +126,10 @@ Route::middleware('auth')->group(function () {
         'destroy'
     ])->name('profile.destroy');
 
-
+    Route::resource(
+        'attendances',
+        AttendanceController::class
+    )->middleware('permission:attendance.view|attendance.manage');
 
 });
 

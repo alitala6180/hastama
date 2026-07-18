@@ -42,6 +42,7 @@ class StoreEmployeeRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:10',
+                'unique:employees,national_code',
             ],
 
 

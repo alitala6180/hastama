@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Models\Employee;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
 class UpdateEmployeeRequest extends FormRequest
 {
@@ -14,12 +16,16 @@ class UpdateEmployeeRequest extends FormRequest
 
     public function rules(): array
     {
+        /** @var Employee $employee */
+        $employee = $this->route('employee');
+
         return [
 
             'employee_code' => [
                 'required',
                 'string',
                 'max:50',
+                Rule::unique('employees', 'employee_code')->ignore($employee),
             ],
 
 
@@ -41,6 +47,7 @@ class UpdateEmployeeRequest extends FormRequest
                 'nullable',
                 'string',
                 'max:10',
+                Rule::unique('employees', 'national_code')->ignore($employee),
             ],
 
 

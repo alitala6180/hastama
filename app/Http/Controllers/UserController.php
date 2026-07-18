@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Employee;
+use App\Http\Requests\StoreUserRequest;
+use App\Http\Requests\UpdateUserRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Spatie\Permission\Models\Role;
@@ -67,14 +69,16 @@ class UserController extends Controller
         ]);
     }
 
-    public function store(Request $request)
+    public function store(StoreUserRequest $request)
     {
-        //
-    }
+        $data = $request->validated();
+        $role = $data['role'];
+        unset($data['role']);
 
-    public function show(User $user)
-    {
-        //
+        $user = User::create($data);
+        $user->syncRoles([$role]);
+
+        return redirect()->route('users.index')->with('success', 'کاربر با موفقیت ایجاد شد.');
     }
 
     public function edit(User $user)
@@ -100,13 +104,27 @@ class UserController extends Controller
         ]);
     }
 
-    public function update(Request $request, User $user)
+    public function update(UpdateUserRequest $request, User $user)
     {
-        //
+        $data = $request->validated();
+        $role = $data['role'];
+        unset($data['role']);
+
+        if (blank($data['password'] ?? null)) {
+            unset($data['password']);
+        }
+
+        $user->update($data);
+        $user->syncRoles([$role]);
+
+        return redirect()->route('users.index')->with('success', 'اطلاعات کاربر به‌روزرسانی شد.');
     }
 
     public function destroy(User $user)
     {
+        abort_unless(request()->user()->can('users.delete'), 403);
+        abort_if($user->is(auth()->user()), 422, 'امکان حذف حساب کاربری فعلی وجود ندارد.');
+
         $user->delete();
 
         return back()->with(

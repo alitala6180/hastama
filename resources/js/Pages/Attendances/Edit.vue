@@ -1,0 +1,9 @@
+<script setup lang="ts">
+import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
+import { Head, useForm } from '@inertiajs/vue3';
+const props = defineProps<{ attendance:{id:number;employee_id:number;work_date:string;check_in:string|null;check_out:string|null}; employees:{id:number;first_name:string;last_name:string;employee_code:string}[] }>();
+const time = (value: string | null) => value ? value.slice(11, 16) : '';
+const form = useForm({ employee_id: props.attendance.employee_id, work_date: props.attendance.work_date.slice(0, 10), check_in: time(props.attendance.check_in), check_out: time(props.attendance.check_out) });
+const submit = () => form.put(route('attendances.update', props.attendance.id));
+</script>
+<template><Head title="ویرایش حضور و غیاب" /><AuthenticatedLayout><template #header><h2 class="text-xl font-semibold">ویرایش رکورد حضور و غیاب</h2></template><form class="mx-auto max-w-2xl space-y-5 rounded-lg bg-white p-6 shadow" @submit.prevent="submit"><div><label class="mb-1 block">پرسنل</label><select v-model="form.employee_id" class="w-full rounded border p-2"><option v-for="employee in props.employees" :key="employee.id" :value="employee.id">{{ employee.employee_code }} — {{ employee.first_name }} {{ employee.last_name }}</option></select></div><div><label class="mb-1 block">تاریخ</label><input v-model="form.work_date" type="date" class="w-full rounded border p-2" /></div><div class="grid grid-cols-2 gap-4"><div><label class="mb-1 block">ورود</label><input v-model="form.check_in" type="time" class="w-full rounded border p-2" /></div><div><label class="mb-1 block">خروج</label><input v-model="form.check_out" type="time" class="w-full rounded border p-2" /></div></div><p v-for="error in form.errors" :key="error" class="text-sm text-red-600">{{ error }}</p><button class="rounded bg-blue-600 px-5 py-2 text-white">ذخیره</button></form></AuthenticatedLayout></template>

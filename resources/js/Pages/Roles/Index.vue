@@ -1,14 +1,2 @@
-<script setup lang="ts">
-</script>
-
-<template>
-
-<div class="p-6">
-
-    <h1 class="text-2xl font-bold">
-        در حال ساخت...
-    </h1>
-
-</div>
-
-</template>
+<script setup lang="ts">import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'; import { Head, Link } from '@inertiajs/vue3'; defineProps<{roles:{id:number;name:string;permissions:{id:number;name:string}[]}[]}>();</script>
+<template><Head title="نقش‌ها و دسترسی‌ها"/><AuthenticatedLayout><template #header><h2 class="text-xl font-semibold">نقش‌ها و دسترسی‌ها</h2></template><div class="rounded-lg bg-white p-6 shadow"><div class="mb-5 flex justify-end"><Link :href="route('roles.create')" class="rounded bg-blue-600 px-4 py-2 text-white">نقش جدید</Link></div><table class="w-full text-right"><thead><tr class="border-b"><th class="p-3">نقش</th><th class="p-3">دسترسی‌ها</th><th></th></tr></thead><tbody><tr v-for="role in roles" :key="role.id" class="border-b"><td class="p-3 font-semibold">{{role.name}}</td><td class="p-3 text-sm">{{role.permissions.map((permission) => permission.name).join('، ') || 'بدون دسترسی'}}</td><td class="p-3"><Link :href="route('roles.edit',role.id)" class="text-blue-600">ویرایش</Link></td></tr></tbody></table></div></AuthenticatedLayout></template>

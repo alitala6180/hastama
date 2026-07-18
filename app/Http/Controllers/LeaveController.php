@@ -4,9 +4,11 @@ namespace App\Http\Controllers;
 
 use App\Models\Leave;
 use App\Models\Employee;
+use App\Http\Requests\StoreLeaveRequest;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Carbon\Carbon;
 
 class LeaveController extends Controller
 {
@@ -74,9 +76,14 @@ class LeaveController extends Controller
     public function store(StoreLeaveRequest $request)
     {
 
+        $validated = $request->validated();
+
+        $validated['days'] = Carbon::parse($validated['from_date'])
+            ->diffInDays(Carbon::parse($validated['to_date'])) + 1;
+
         $employee = Employee::findOrFail(
 
-            $request->employee_id
+            $validated['employee_id']
 
         );
 
@@ -103,11 +110,11 @@ class LeaveController extends Controller
 
         if(
 
-            $request->type == 'annual'
+            $validated['type'] == 'annual'
 
             &&
 
-            $request->days > $remaining
+            $validated['days'] > $remaining
 
         ){
 
@@ -126,7 +133,7 @@ class LeaveController extends Controller
 
         Leave::create(
 
-            $request->validated()
+            $validated
 
         );
 
@@ -167,6 +174,8 @@ class LeaveController extends Controller
 
     public function approve(Leave $leave)
     {
+        abort_unless(auth()->user()->can('leave.manage'), 403);
+        abort_if($leave->status !== 'pending', 422, 'این درخواست قبلاً بررسی شده است.');
 
         $leave->update([
 
@@ -188,6 +197,8 @@ class LeaveController extends Controller
 
     public function reject(Leave $leave)
     {
+        abort_unless(auth()->user()->can('leave.manage'), 403);
+        abort_if($leave->status !== 'pending', 422, 'این درخواست قبلاً بررسی شده است.');
 
         $leave->update([
 
