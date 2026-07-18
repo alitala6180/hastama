@@ -9,6 +9,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\RoleController;
+use App\Http\Controllers\AttendanceReportController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -35,6 +36,16 @@ Route::middleware('auth')->group(function () {
     Route::post('attendances/{employee}/check-out', [AttendanceController::class, 'checkOut'])
         ->middleware('permission:attendance.manage')
         ->name('attendances.checkOut');
+
+    Route::get(
+        'attendance-reports',
+        [
+            AttendanceReportController::class,
+            'index'
+        ]
+    )
+        ->middleware('permission:reports.view')
+        ->name('attendance.reports');
 
     Route::patch(
         '/leaves/{leave}/approve',
