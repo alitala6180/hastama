@@ -53,8 +53,9 @@ const props = defineProps<{
 
 
 
-const form = useForm({
 
+
+const form = useForm({
 
     employee_code:'',
 
@@ -66,11 +67,11 @@ const form = useForm({
 
     mobile:'',
 
-    department_id:'',
+    department_id:null as number|null,
 
-    position_id:'',
+    position_id:null as number|null,
 
-    shift_id:'',
+    shift_id:null as number|null,
 
     hire_date:'',
 
@@ -83,11 +84,21 @@ const form = useForm({
 
 
 
+
+
 function submit()
 {
 
     form.post(
-        route('employees.store')
+
+        route('employees.store'),
+
+        {
+
+            preserveScroll:true,
+
+        }
+
     );
 
 }
@@ -95,6 +106,7 @@ function submit()
 
 
 </script>
+
 
 
 
@@ -124,11 +136,15 @@ function submit()
 
 
 
+
+
 <div class="p-6">
 
 
 
 <div class="rounded-lg bg-white p-6 shadow">
+
+
 
 
 
@@ -162,24 +178,26 @@ class="space-y-6"
 
 v-model="form.employee_code"
 
-type="text"
-
 class="w-full rounded border-gray-300"
 
 />
 
 
-<div
+<p
+
 v-if="form.errors.employee_code"
+
 class="mt-1 text-sm text-red-600"
+
 >
 
 {{ form.errors.employee_code }}
 
-</div>
+</p>
 
 
 </div>
+
 
 
 
@@ -199,14 +217,27 @@ class="mt-1 text-sm text-red-600"
 
 v-model="form.first_name"
 
-type="text"
-
 class="w-full rounded border-gray-300"
 
 />
 
 
+<p
+
+v-if="form.errors.first_name"
+
+class="mt-1 text-sm text-red-600"
+
+>
+
+{{ form.errors.first_name }}
+
+</p>
+
+
 </div>
+
+
 
 
 
@@ -226,14 +257,27 @@ class="w-full rounded border-gray-300"
 
 v-model="form.last_name"
 
-type="text"
-
 class="w-full rounded border-gray-300"
 
 />
 
 
+<p
+
+v-if="form.errors.last_name"
+
+class="mt-1 text-sm text-red-600"
+
+>
+
+{{ form.errors.last_name }}
+
+</p>
+
+
 </div>
+
+
 
 
 
@@ -253,14 +297,14 @@ class="w-full rounded border-gray-300"
 
 v-model="form.national_code"
 
-type="text"
-
 class="w-full rounded border-gray-300"
 
 />
 
 
 </div>
+
+
 
 
 
@@ -280,14 +324,14 @@ class="w-full rounded border-gray-300"
 
 v-model="form.mobile"
 
-type="text"
-
 class="w-full rounded border-gray-300"
 
 />
 
 
 </div>
+
+
 
 
 
@@ -305,9 +349,9 @@ class="w-full rounded border-gray-300"
 
 <input
 
-v-model="form.hire_date"
-
 type="date"
+
+v-model="form.hire_date"
 
 class="w-full rounded border-gray-300"
 
@@ -315,6 +359,8 @@ class="w-full rounded border-gray-300"
 
 
 </div>
+
+
 
 
 
@@ -340,11 +386,12 @@ class="w-full rounded border-gray-300"
 >
 
 
-<option value="">
+<option :value="null">
 
 انتخاب کنید
 
 </option>
+
 
 
 <option
@@ -362,10 +409,14 @@ v-for="department in departments"
 </option>
 
 
+
 </select>
 
 
 </div>
+
+
+
 
 
 
@@ -391,11 +442,12 @@ class="w-full rounded border-gray-300"
 >
 
 
-<option value="">
+<option :value="null">
 
 انتخاب کنید
 
 </option>
+
 
 
 <option
@@ -413,6 +465,7 @@ v-for="position in positions"
 </option>
 
 
+
 </select>
 
 
@@ -425,11 +478,8 @@ v-for="position in positions"
 
 
 
-<!-- Shift -->
-
 
 <div>
-
 
 <label class="mb-2 block">
 
@@ -448,9 +498,9 @@ class="w-full rounded border-gray-300"
 >
 
 
-<option value="">
+<option :value="null">
 
-انتخاب کنید
+بدون شیفت
 
 </option>
 
@@ -466,17 +516,9 @@ v-for="shift in shifts"
 
 >
 
-
 {{ shift.name }}
 
--
-
-{{ shift.start_time }}
-
-تا
-
-{{ shift.end_time }}
-
+({{ shift.start_time }} - {{ shift.end_time }})
 
 </option>
 
@@ -486,7 +528,7 @@ v-for="shift in shifts"
 
 
 
-<div
+<p
 
 v-if="form.errors.shift_id"
 
@@ -496,8 +538,54 @@ class="mt-1 text-sm text-red-600"
 
 {{ form.errors.shift_id }}
 
+</p>
+
+
+
 </div>
 
+
+
+
+
+
+
+
+<div>
+
+<label class="mb-2 block">
+
+وضعیت
+
+</label>
+
+
+<select
+
+v-model="form.status"
+
+class="w-full rounded border-gray-300"
+
+>
+
+
+<option value="active">
+
+فعال
+
+</option>
+
+
+
+<option value="inactive">
+
+غیرفعال
+
+</option>
+
+
+
+</select>
 
 
 </div>
@@ -518,6 +606,7 @@ class="mt-1 text-sm text-red-600"
 <div class="flex justify-end">
 
 
+
 <button
 
 type="submit"
@@ -528,14 +617,28 @@ class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 disabled:op
 
 >
 
+
+<span v-if="form.processing">
+
+در حال ذخیره...
+
+</span>
+
+
+<span v-else>
+
 ذخیره
+
+</span>
+
+
 
 </button>
 
 
 
-</div>
 
+</div>
 
 
 
@@ -546,11 +649,13 @@ class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 disabled:op
 
 
 
-</div>
-
-
 
 </div>
+
+
+
+</div>
+
 
 
 

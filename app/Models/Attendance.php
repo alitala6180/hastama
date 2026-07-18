@@ -3,9 +3,15 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class Attendance extends Model
 {
+
+    use HasFactory;
+
+
+
     protected $fillable = [
 
         'employee_id',
@@ -24,6 +30,10 @@ class Attendance extends Model
 
     ];
 
+
+
+
+
     protected $casts = [
 
         'work_date' => 'date',
@@ -34,8 +44,18 @@ class Attendance extends Model
 
     ];
 
+
+
+
+
     public function employee()
     {
-        return $this->belongsTo(Employee::class);
+
+        return $this->belongsTo(
+            Employee::class
+        );
+
     }
+
+
 }

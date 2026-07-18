@@ -47,6 +47,12 @@ const menu = [
         route: 'leaves.index',
         icon: '📅',
     },
+
+    {
+        title: 'شیفت‌های کاری',
+        route: 'shifts.index',
+        icon: '⏰',
+    },
 ];
 
 function isActive(routeName: string) {

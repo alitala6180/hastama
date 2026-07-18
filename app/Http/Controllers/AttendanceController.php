@@ -2,11 +2,16 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Models\Attendance;
 use App\Models\Employee;
+
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+
 use Inertia\Inertia;
+
+
 
 class AttendanceController extends Controller
 {
@@ -18,6 +23,7 @@ class AttendanceController extends Controller
         $date = $request->date ?? now()->toDateString();
 
 
+
         $attendances = Attendance::with([
 
             'employee:id,first_name,last_name,employee_code'
@@ -25,11 +31,8 @@ class AttendanceController extends Controller
         ])
 
         ->whereDate(
-
             'work_date',
-
             $date
-
         )
 
         ->latest()
@@ -40,28 +43,37 @@ class AttendanceController extends Controller
 
 
 
+
+
+
         $employees = Employee::where(
             'status',
             'active'
         )
 
         ->select(
+
             'id',
+
             'first_name',
+
             'last_name',
-            'employee_code'
+
+            'employee_code',
+
+            'shift_id'
+
         )
 
         ->with([
 
+            'shift:id,name,start_time,end_time',
+
             'attendances'=>function($query) use ($date){
 
                 $query->whereDate(
-
                     'work_date',
-
                     $date
-
                 );
 
             }
@@ -69,6 +81,8 @@ class AttendanceController extends Controller
         ])
 
         ->get();
+
+
 
 
 
@@ -90,6 +104,9 @@ class AttendanceController extends Controller
         );
 
     }
+
+
+
 
 
 
@@ -125,29 +142,77 @@ class AttendanceController extends Controller
 
 
 
+
+
+
     public function store(Request $request)
     {
-        abort_unless($request->user()->can('attendance.manage'), 403);
+
+        abort_unless(
+            $request->user()->can('attendance.manage'),
+            403
+        );
+
+
 
         $validated = $request->validate([
 
+
             'employee_id'=>'required|exists:employees,id',
+
 
             'work_date'=>'required|date',
 
+
             'check_in'=>'required',
+
 
             'check_out'=>'nullable',
 
+
         ]);
 
+
+
+
+
+
         $request->validate([
-            'employee_id' => [Rule::unique('attendances', 'employee_id')->where('work_date', $validated['work_date'])],
+
+
+            'employee_id'=>[
+
+                Rule::unique('attendances','employee_id')
+
+                ->where(
+                    'work_date',
+                    $validated['work_date']
+                )
+
+            ]
+
         ]);
+
+
+
+
+
+
+        $employee = Employee::with('shift')
+
+            ->findOrFail(
+                $validated['employee_id']
+            );
+
+
+
+
 
 
 
         $times = $this->calculateTimes(
+
+            $employee,
 
             $validated['work_date'],
 
@@ -156,6 +221,10 @@ class AttendanceController extends Controller
             $validated['check_out']
 
         );
+
+
+
+
 
 
 
@@ -169,13 +238,20 @@ class AttendanceController extends Controller
 
 
 
+
+
+
+
         return redirect()
 
             ->route('attendances.index')
 
             ->with(
+
                 'success',
+
                 'حضور و غیاب ثبت شد'
+
             );
 
     }
@@ -183,134 +259,6 @@ class AttendanceController extends Controller
 
 
 
-
-    public function show(Attendance $attendance)
-    {
-
-        $attendance->load('employee');
-
-
-        return Inertia::render(
-            'Attendances/Show',
-            [
-
-                'attendance'=>$attendance
-
-            ]
-        );
-
-    }
-
-
-
-
-
-    public function edit(Attendance $attendance)
-    {
-
-        return Inertia::render(
-            'Attendances/Edit',
-            [
-
-                'attendance'=>$attendance,
-
-                'employees'=>Employee::where(
-                    'status',
-                    'active'
-                )
-
-                ->select(
-                    'id',
-                    'first_name',
-                    'last_name',
-                    'employee_code'
-                )
-
-                ->get()
-
-            ]
-        );
-
-    }
-
-
-
-
-
-    public function update(Request $request, Attendance $attendance)
-    {
-        abort_unless($request->user()->can('attendance.manage'), 403);
-
-        $validated = $request->validate([
-
-            'employee_id'=>'required|exists:employees,id',
-
-            'work_date'=>'required|date',
-
-            'check_in'=>'required',
-
-            'check_out'=>'nullable',
-
-        ]);
-
-        $request->validate([
-            'employee_id' => [Rule::unique('attendances', 'employee_id')->where('work_date', $validated['work_date'])->ignore($attendance)],
-        ]);
-
-
-
-        $times = $this->calculateTimes(
-
-            $validated['work_date'],
-
-            $validated['check_in'],
-
-            $validated['check_out']
-
-        );
-
-
-
-        $attendance->update([
-
-            ...$validated,
-
-            ...$times,
-
-        ]);
-
-
-
-        return redirect()
-
-            ->route('attendances.index')
-
-            ->with(
-                'success',
-                'حضور و غیاب بروزرسانی شد'
-            );
-
-    }
-
-
-
-
-
-    public function destroy(Attendance $attendance)
-    {
-        abort_unless(request()->user()->can('attendance.manage'), 403);
-
-        $attendance->delete();
-
-
-        return back()
-
-            ->with(
-                'success',
-                'رکورد حذف شد'
-            );
-
-    }
 
 
 
@@ -319,17 +267,34 @@ class AttendanceController extends Controller
     public function checkIn(Employee $employee)
     {
 
+
+        abort_unless(
+            request()->user()->can('attendance.manage'),
+            403
+        );
+
+
+
         $today = now()->toDateString();
+
+
 
 
 
         $attendance = Attendance::firstOrCreate([
 
+
             'employee_id'=>$employee->id,
+
 
             'work_date'=>$today,
 
+
         ]);
+
+
+
+
 
 
 
@@ -344,15 +309,26 @@ class AttendanceController extends Controller
 
             );
 
+
         }
+
+
+
+
 
 
 
         $attendance->update([
 
+
             'check_in'=>now(),
 
+
         ]);
+
+
+
+
 
 
 
@@ -364,7 +340,11 @@ class AttendanceController extends Controller
 
         );
 
+
     }
+
+
+
 
 
 
@@ -374,7 +354,19 @@ class AttendanceController extends Controller
     public function checkOut(Employee $employee)
     {
 
+
+        abort_unless(
+            request()->user()->can('attendance.manage'),
+            403
+        );
+
+
+
+
         $today = now()->toDateString();
+
+
+
 
 
 
@@ -398,7 +390,12 @@ class AttendanceController extends Controller
 
 
 
-        if(!$attendance){
+
+
+
+
+
+        if(!$attendance || !$attendance->check_in){
 
 
             return back()->with(
@@ -413,18 +410,11 @@ class AttendanceController extends Controller
 
 
 
-        if(!$attendance->check_in){
 
 
-            return back()->with(
 
-                'error',
 
-                'ابتدا ورود را ثبت کنید'
-
-            );
-
-        }
+        $employee->load('shift');
 
 
 
@@ -432,7 +422,11 @@ class AttendanceController extends Controller
 
 
 
+
+
         $times = $this->calculateTimes(
+
+            $employee,
 
             $today,
 
@@ -444,13 +438,25 @@ class AttendanceController extends Controller
 
 
 
+
+
+
+
+
         $attendance->update([
+
 
             'check_out'=>$checkOut,
 
+
             ...$times
 
+
         ]);
+
+
+
+
 
 
 
@@ -462,6 +468,7 @@ class AttendanceController extends Controller
 
         );
 
+
     }
 
 
@@ -469,7 +476,12 @@ class AttendanceController extends Controller
 
 
 
+
+
+
     private function calculateTimes(
+
+        Employee $employee,
 
         $date,
 
@@ -479,6 +491,8 @@ class AttendanceController extends Controller
 
     ){
 
+
+
         $workedMinutes = 0;
 
         $lateMinutes = 0;
@@ -487,73 +501,146 @@ class AttendanceController extends Controller
 
 
 
-        if($checkIn){
-
-
-            $start = strtotime(
-
-                $date.' '.$checkIn
-
-            );
-
-
-            $officialStart = strtotime(
-
-                $date.' 08:00:00'
-
-            );
 
 
 
-            if($start > $officialStart){
 
+        if(!$employee->shift){
 
-                $lateMinutes = intval(
+            return [
 
-                    ($start-$officialStart)/60
+                'worked_minutes'=>0,
 
-                );
+                'late_minutes'=>0,
 
-            }
+                'overtime_minutes'=>0,
 
-
-
-            if($checkOut){
-
-
-                $end = strtotime(
-
-                    $date.' '.$checkOut
-
-                );
-
-
-                if($end > $start){
-
-
-                    $workedMinutes = intval(
-
-                        ($end-$start)/60
-
-                    );
-
-
-                }
-
-
-
-                if($workedMinutes > 480){
-
-
-                    $overtimeMinutes =
-
-                        $workedMinutes - 480;
-
-                }
-
-            }
+            ];
 
         }
+
+
+
+
+
+
+
+
+        $shiftStart = strtotime(
+
+            $date.' '.$employee->shift->start_time
+
+        );
+
+
+
+
+
+
+        $shiftEnd = strtotime(
+
+            $date.' '.$employee->shift->end_time
+
+        );
+
+
+
+
+
+
+
+
+        $start = strtotime(
+
+            $date.' '.$checkIn
+
+        );
+
+
+
+
+
+
+
+
+        if($start > $shiftStart){
+
+
+            $lateMinutes = intval(
+
+                ($start-$shiftStart)/60
+
+            );
+
+
+        }
+
+
+
+
+
+
+
+
+
+        if($checkOut){
+
+
+            $end = strtotime(
+
+                $date.' '.$checkOut
+
+            );
+
+
+
+
+            if($end > $start){
+
+
+                $workedMinutes = intval(
+
+                    ($end-$start)/60
+
+                );
+
+            }
+
+
+
+
+
+
+
+            $standardMinutes = intval(
+
+                ($shiftEnd-$shiftStart)/60
+
+            );
+
+
+
+
+
+
+            if($workedMinutes > $standardMinutes){
+
+
+                $overtimeMinutes =
+
+                    $workedMinutes - $standardMinutes;
+
+
+            }
+
+
+        }
+
+
+
+
+
+
 
 
 
@@ -568,6 +655,5 @@ class AttendanceController extends Controller
         ];
 
     }
-
 
 }

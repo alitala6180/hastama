@@ -2,9 +2,14 @@
 
 namespace App\Http\Requests;
 
+
 use App\Models\Employee;
+
 use Illuminate\Foundation\Http\FormRequest;
+
 use Illuminate\Validation\Rule;
+
+
 
 
 class UpdateEmployeeRequest extends FormRequest
@@ -13,8 +18,12 @@ class UpdateEmployeeRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return true;
+
+        return $this->user()?->can('employees.edit') ?? false;
+
     }
+
+
 
 
 
@@ -29,10 +38,13 @@ class UpdateEmployeeRequest extends FormRequest
 
 
 
+
         return [
 
 
-            'employee_code' => [
+
+            'employee_code'=>[
+
 
                 'required',
 
@@ -40,18 +52,22 @@ class UpdateEmployeeRequest extends FormRequest
 
                 'max:50',
 
+
                 Rule::unique(
                     'employees',
                     'employee_code'
                 )->ignore($employee),
 
+
             ],
 
 
 
 
 
-            'first_name' => [
+
+            'first_name'=>[
+
 
                 'required',
 
@@ -59,13 +75,16 @@ class UpdateEmployeeRequest extends FormRequest
 
                 'max:100',
 
+
             ],
 
 
 
 
 
-            'last_name' => [
+
+            'last_name'=>[
+
 
                 'required',
 
@@ -73,13 +92,16 @@ class UpdateEmployeeRequest extends FormRequest
 
                 'max:100',
 
+
             ],
 
 
 
 
 
-            'national_code' => [
+
+            'national_code'=>[
+
 
                 'nullable',
 
@@ -87,54 +109,69 @@ class UpdateEmployeeRequest extends FormRequest
 
                 'max:10',
 
+
+
                 Rule::unique(
                     'employees',
                     'national_code'
                 )->ignore($employee),
 
+
+
             ],
 
 
 
 
 
-            'department_id' => [
+
+            'department_id'=>[
+
 
                 'required',
 
                 'exists:departments,id',
 
+
             ],
 
 
 
 
 
-            'position_id' => [
+
+            'position_id'=>[
+
 
                 'required',
 
                 'exists:positions,id',
 
+
             ],
 
 
 
 
 
-            'shift_id' => [
+
+            'shift_id'=>[
+
 
                 'nullable',
 
                 'exists:shifts,id',
 
+
             ],
 
 
 
 
 
-            'mobile' => [
+
+            'mobile'=>[
+
 
                 'nullable',
 
@@ -142,29 +179,36 @@ class UpdateEmployeeRequest extends FormRequest
 
                 'max:20',
 
+
             ],
 
 
 
 
 
-            'hire_date' => [
+
+            'hire_date'=>[
+
 
                 'nullable',
 
                 'date',
 
+
             ],
 
 
 
 
 
-            'status' => [
+
+            'status'=>[
+
 
                 'required',
 
                 'in:active,inactive',
+
 
             ],
 

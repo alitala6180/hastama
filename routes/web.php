@@ -10,6 +10,7 @@ use App\Http\Controllers\LeaveController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\AttendanceReportController;
+use App\Http\Controllers\ShiftController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -94,7 +95,10 @@ Route::middleware('auth')->group(function () {
     Route::resource('positions', PositionController::class)
         ->middleware('permission:positions.view|positions.manage');
 
-
+    Route::resource(
+        'shifts',
+        ShiftController::class
+    );    
 
     /*
     |--------------------------------------------------------------------------

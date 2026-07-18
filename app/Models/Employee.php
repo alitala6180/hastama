@@ -9,6 +9,8 @@ use App\Models\User;
 use App\Models\Department;
 use App\Models\Position;
 use App\Models\Shift;
+use App\Models\Leave;
+use App\Models\Attendance;
 
 
 class Employee extends Model
@@ -45,11 +47,13 @@ class Employee extends Model
 
 
 
+
     protected $casts = [
 
         'hire_date' => 'date',
 
     ];
+
 
 
 
@@ -71,8 +75,10 @@ class Employee extends Model
 
 
 
+
+
     /**
-     * واحد سازمانی کارمند
+     * واحد سازمانی
      */
     public function department()
     {
@@ -87,8 +93,10 @@ class Employee extends Model
 
 
 
+
+
     /**
-     * سمت شغلی کارمند
+     * سمت شغلی
      */
     public function position()
     {
@@ -103,8 +111,10 @@ class Employee extends Model
 
 
 
+
+
     /**
-     * شیفت کاری کارمند
+     * شیفت کاری
      */
     public function shift()
     {
@@ -119,13 +129,17 @@ class Employee extends Model
 
 
 
+
+
     /**
-     * نام کامل کارمند
+     * حضور و غیاب
      */
-    public function getFullNameAttribute()
+    public function attendances()
     {
 
-        return $this->first_name . ' ' . $this->last_name;
+        return $this->hasMany(
+            Attendance::class
+        );
 
     }
 
@@ -133,6 +147,11 @@ class Employee extends Model
 
 
 
+
+
+    /**
+     * درخواست های مرخصی
+     */
     public function leaves()
     {
 
@@ -146,6 +165,11 @@ class Employee extends Model
 
 
 
+
+
+    /**
+     * مرخصی های تایید شده سالانه
+     */
     public function usedLeaves()
     {
 
@@ -169,12 +193,17 @@ class Employee extends Model
 
 
 
+
+
+    /**
+     * مانده مرخصی
+     */
     public function getRemainingLeaveAttribute()
     {
 
         return
 
-            $this->annual_leave
+            ($this->annual_leave ?? 0)
 
             -
 
@@ -186,12 +215,25 @@ class Employee extends Model
 
 
 
-    public function attendances()
+
+
+    /**
+     * نام کامل
+     */
+    public function getFullNameAttribute()
     {
 
-        return $this->hasMany(
-            Attendance::class
-        );
+        return
+
+            $this->first_name
+
+            .
+
+            ' '
+
+            .
+
+            $this->last_name;
 
     }
 

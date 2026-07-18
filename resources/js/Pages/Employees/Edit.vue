@@ -87,35 +87,27 @@ const props = defineProps<{
 
 
 
+
 const form = useForm({
 
 
     employee_code:props.employee.employee_code,
 
-
     first_name:props.employee.first_name,
-
 
     last_name:props.employee.last_name,
 
-
-    national_code:props.employee.national_code,
-
+    national_code:props.employee.national_code ?? '',
 
     mobile:props.employee.mobile ?? '',
 
-
     department_id:props.employee.department_id,
-
 
     position_id:props.employee.position_id,
 
-
-    shift_id:props.employee.shift_id ?? '',
-
+    shift_id:props.employee.shift_id,
 
     hire_date:props.employee.hire_date ?? '',
-
 
     status:props.employee.status,
 
@@ -128,10 +120,8 @@ const form = useForm({
 
 
 
-
 function submit()
 {
-
 
     form.put(
 
@@ -162,10 +152,13 @@ function submit()
 
 
 
+
+
 <template>
 
 
 <Head title="ویرایش پرسنل"/>
+
 
 
 
@@ -195,6 +188,8 @@ function submit()
 
 
 
+
+
 <div
 
 v-if="Object.keys(form.errors).length"
@@ -206,12 +201,11 @@ class="mb-5 rounded-lg bg-red-100 p-4 text-red-700"
 
 <ul>
 
-
 <li
 
-v-for="error in form.errors"
+v-for="(error,key) in form.errors"
 
-:key="error"
+:key="key"
 
 >
 
@@ -235,7 +229,7 @@ v-for="error in form.errors"
 
 @submit.prevent="submit"
 
-class="space-y-5 rounded-lg bg-white p-6 shadow"
+class="space-y-6 rounded-lg bg-white p-6 shadow"
 
 >
 
@@ -243,7 +237,7 @@ class="space-y-5 rounded-lg bg-white p-6 shadow"
 
 
 
-<div class="grid grid-cols-2 gap-5">
+<div class="grid grid-cols-1 gap-5 md:grid-cols-2">
 
 
 
@@ -255,6 +249,7 @@ class="space-y-5 rounded-lg bg-white p-6 shadow"
 <label>
 کد پرسنلی
 </label>
+
 
 <input
 
@@ -278,6 +273,7 @@ class="w-full rounded border p-2"
 نام
 </label>
 
+
 <input
 
 v-model="form.first_name"
@@ -294,11 +290,13 @@ class="w-full rounded border p-2"
 
 
 
+
 <div>
 
 <label>
 نام خانوادگی
 </label>
+
 
 <input
 
@@ -316,11 +314,13 @@ class="w-full rounded border p-2"
 
 
 
+
 <div>
 
 <label>
 کد ملی
 </label>
+
 
 <input
 
@@ -338,11 +338,13 @@ class="w-full rounded border p-2"
 
 
 
+
 <div>
 
 <label>
 موبایل
 </label>
+
 
 <input
 
@@ -360,11 +362,13 @@ class="w-full rounded border p-2"
 
 
 
+
 <div>
 
 <label>
 تاریخ استخدام
 </label>
+
 
 <input
 
@@ -384,12 +388,13 @@ class="w-full rounded border p-2"
 
 
 
+
+
 <div>
 
 <label>
 واحد سازمانی
 </label>
-
 
 
 <select
@@ -427,12 +432,13 @@ v-for="item in departments"
 
 
 
+
+
 <div>
 
 <label>
 سمت شغلی
 </label>
-
 
 
 <select
@@ -471,7 +477,7 @@ v-for="item in positions"
 
 
 
-<!-- Shift -->
+
 
 <div>
 
@@ -490,11 +496,12 @@ class="w-full rounded border p-2"
 >
 
 
-<option value="">
+<option :value="null">
 
-انتخاب کنید
+بدون شیفت
 
 </option>
+
 
 
 
@@ -510,22 +517,18 @@ v-for="shift in shifts"
 
 {{ shift.name }}
 
--
-
-{{ shift.start_time }}
-
-تا
-
-{{ shift.end_time }}
+({{ shift.start_time }} - {{ shift.end_time }})
 
 </option>
+
 
 
 </select>
 
 
 
-<div
+
+<p
 
 v-if="form.errors.shift_id"
 
@@ -535,7 +538,7 @@ class="mt-1 text-sm text-red-600"
 
 {{ form.errors.shift_id }}
 
-</div>
+</p>
 
 
 
@@ -554,7 +557,6 @@ class="mt-1 text-sm text-red-600"
 <label>
 وضعیت
 </label>
-
 
 
 <select
@@ -590,7 +592,6 @@ class="w-full rounded border p-2"
 
 
 
-
 </div>
 
 
@@ -605,7 +606,7 @@ type="submit"
 
 :disabled="form.processing"
 
-class="rounded bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
+class="rounded bg-blue-600 px-6 py-2 text-white hover:bg-blue-700 disabled:opacity-50"
 
 >
 
@@ -644,7 +645,9 @@ class="rounded bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
 
 
 
+
 </AuthenticatedLayout>
+
 
 
 

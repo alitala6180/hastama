@@ -2,16 +2,21 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Models\Employee;
 use App\Models\Department;
 use App\Models\Position;
 use App\Models\Shift;
 
+
 use App\Http\Requests\StoreEmployeeRequest;
 use App\Http\Requests\UpdateEmployeeRequest;
 
+
 use Illuminate\Http\Request;
+
 use Inertia\Inertia;
+
 
 
 class EmployeeController extends Controller
@@ -21,7 +26,9 @@ class EmployeeController extends Controller
     public function index(Request $request)
     {
 
+
         $employees = Employee::query()
+
 
             ->with([
 
@@ -35,29 +42,56 @@ class EmployeeController extends Controller
 
 
 
-            ->when($request->search, function ($query, $search) {
+
+            ->when(
+                $request->search,
+                function($query,$search){
+
+                    $query->where(function($q) use($search){
 
 
-                $query->where(function ($q) use ($search) {
+                        $q
+
+                        ->where(
+                            'first_name',
+                            'like',
+                            "%{$search}%"
+                        )
 
 
-                    $q->where('first_name', 'like', "%{$search}%")
-
-                        ->orWhere('last_name', 'like', "%{$search}%")
-
-                        ->orWhere('employee_code', 'like', "%{$search}%")
-
-                        ->orWhere('national_code', 'like', "%{$search}%");
+                        ->orWhere(
+                            'last_name',
+                            'like',
+                            "%{$search}%"
+                        )
 
 
-                });
+                        ->orWhere(
+                            'employee_code',
+                            'like',
+                            "%{$search}%"
+                        )
 
 
-            })
+                        ->orWhere(
+                            'national_code',
+                            'like',
+                            "%{$search}%"
+                        );
+
+
+                    });
+
+
+                }
+            )
+
+
 
 
 
             ->select([
+
 
                 'id',
 
@@ -79,7 +113,9 @@ class EmployeeController extends Controller
 
                 'created_at',
 
+
             ])
+
 
 
 
@@ -92,22 +128,33 @@ class EmployeeController extends Controller
 
 
 
-        return Inertia::render('Employees/Index', [
 
 
-            'employees'=>$employees,
 
 
-            'filters'=>[
+        return Inertia::render(
 
-                'search'=>$request->search,
+            'Employees/Index',
 
-            ],
+            [
+
+                'employees'=>$employees,
 
 
-        ]);
+                'filters'=>[
+
+                    'search'=>$request->search
+
+                ]
+
+            ]
+
+        );
+
 
     }
+
+
 
 
 
@@ -117,48 +164,68 @@ class EmployeeController extends Controller
     public function create()
     {
 
-        return Inertia::render('Employees/Create', [
+
+        return Inertia::render(
+
+            'Employees/Create',
+
+            [
 
 
-
-            'departments'=>Department::where('is_active',true)
-
-                ->select('id','name')
-
-                ->get(),
-
-
-
-
-            'positions'=>Position::where('is_active',true)
-
-                ->select('id','name')
-
-                ->get(),
-
-
-
-
-            'shifts'=>Shift::where('is_active',true)
+                'departments'=>Department::where(
+                    'is_active',
+                    true
+                )
 
                 ->select(
-
                     'id',
-
-                    'name',
-
-                    'start_time',
-
-                    'end_time'
-
+                    'name'
                 )
 
                 ->get(),
 
 
-        ]);
+
+
+                'positions'=>Position::where(
+                    'is_active',
+                    true
+                )
+
+                ->select(
+                    'id',
+                    'name'
+                )
+
+                ->get(),
+
+
+
+
+
+                'shifts'=>Shift::where(
+                    'is_active',
+                    true
+                )
+
+                ->select(
+                    'id',
+                    'name'
+                )
+
+                ->get(),
+
+
+
+            ]
+
+        );
+
 
     }
+
+
+
 
 
 
@@ -168,10 +235,16 @@ class EmployeeController extends Controller
     public function store(StoreEmployeeRequest $request)
     {
 
+
         abort_unless(
-            $request->user()->can('employees.create'),
+
+            $request->user()
+            ->can('employees.create'),
+
             403
+
         );
+
 
 
 
@@ -183,16 +256,21 @@ class EmployeeController extends Controller
 
 
 
+
         return redirect()
 
-            ->route('employees.index')
+            ->route(
+                'employees.index'
+            )
 
             ->with(
                 'success',
                 'پرسنل با موفقیت ثبت شد'
             );
 
+
     }
+
 
 
 
@@ -217,16 +295,23 @@ class EmployeeController extends Controller
 
 
 
-        return Inertia::render('Employees/Show',[
 
+        return Inertia::render(
 
-            'employee'=>$employee
+            'Employees/Show',
 
+            [
 
-        ]);
+                'employee'=>$employee
+
+            ]
+
+        );
 
 
     }
+
+
 
 
 
@@ -237,56 +322,73 @@ class EmployeeController extends Controller
     public function edit(Employee $employee)
     {
 
-        return Inertia::render('Employees/Edit',[
+
+        return Inertia::render(
+
+            'Employees/Edit',
+
+            [
 
 
-
-            'employee'=>$employee,
-
-
-
-
-            'departments'=>Department::where('is_active',true)
-
-                ->select('id','name')
-
-                ->get(),
+                'employee'=>$employee,
 
 
 
 
-
-            'positions'=>Position::where('is_active',true)
-
-                ->select('id','name')
-
-                ->get(),
-
-
-
-
-
-            'shifts'=>Shift::where('is_active',true)
+                'departments'=>Department::where(
+                    'is_active',
+                    true
+                )
 
                 ->select(
-
                     'id',
-
-                    'name',
-
-                    'start_time',
-
-                    'end_time'
-
+                    'name'
                 )
 
                 ->get(),
 
 
 
-        ]);
+
+
+                'positions'=>Position::where(
+                    'is_active',
+                    true
+                )
+
+                ->select(
+                    'id',
+                    'name'
+                )
+
+                ->get(),
+
+
+
+
+
+                'shifts'=>Shift::where(
+                    'is_active',
+                    true
+                )
+
+                ->select(
+                    'id',
+                    'name'
+                )
+
+                ->get(),
+
+
+
+            ]
+
+        );
+
 
     }
+
+
 
 
 
@@ -302,9 +404,14 @@ class EmployeeController extends Controller
 
 
         abort_unless(
-            $request->user()->can('employees.edit'),
+
+            $request->user()
+            ->can('employees.edit'),
+
             403
+
         );
+
 
 
 
@@ -316,9 +423,12 @@ class EmployeeController extends Controller
 
 
 
+
         return redirect()
 
-            ->route('employees.index')
+            ->route(
+                'employees.index'
+            )
 
             ->with(
                 'success',
@@ -335,14 +445,21 @@ class EmployeeController extends Controller
 
 
 
+
     public function destroy(Employee $employee)
     {
 
 
         abort_unless(
-            request()->user()->can('employees.delete'),
+
+            request()
+            ->user()
+            ->can('employees.delete'),
+
             403
+
         );
+
 
 
 
@@ -350,9 +467,12 @@ class EmployeeController extends Controller
 
 
 
+
         return redirect()
 
-            ->route('employees.index')
+            ->route(
+                'employees.index'
+            )
 
             ->with(
                 'success',
