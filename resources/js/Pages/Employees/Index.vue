@@ -6,72 +6,125 @@ import { Head, Link, router } from '@inertiajs/vue3';
 
 
 interface Department {
-    id: number;
-    name: string;
+
+    id:number;
+
+    name:string;
+
 }
 
 
 
 interface Position {
-    id: number;
-    name: string;
+
+    id:number;
+
+    name:string;
+
 }
+
+
+
+interface Shift {
+
+    id:number;
+
+    name:string;
+
+    start_time:string;
+
+    end_time:string;
+
+}
+
+
 
 
 
 interface Employee {
 
-    id: number;
 
-    employee_code: string;
+    id:number;
 
-    first_name: string;
 
-    last_name: string;
+    employee_code:string;
 
-    national_code: string;
 
-    mobile?: string | null;
+    first_name:string;
 
-    status: string;
 
-    department_id: number;
+    last_name:string;
 
-    position_id: number;
 
-    department?: Department;
+    national_code:string;
 
-    position?: Position;
+
+    mobile?:string|null;
+
+
+    status:string;
+
+
+    department_id:number;
+
+
+    position_id:number;
+
+
+    shift_id:number|null;
+
+
+
+    department?:Department;
+
+
+    position?:Position;
+
+
+    shift?:Shift;
+
 
 }
+
+
 
 
 
 interface PaginationLink {
 
-    url: string | null;
 
-    label: string;
+    url:string|null;
 
-    active: boolean;
+
+    label:string;
+
+
+    active:boolean;
+
 
 }
+
 
 
 
 interface EmployeesData {
 
-    data: Employee[];
 
-    links: PaginationLink[];
+    data:Employee[];
+
+
+    links:PaginationLink[];
+
 
 }
 
 
 
+
+
 const props = defineProps<{
 
-    employees: EmployeesData;
+    employees:EmployeesData;
 
 }>();
 
@@ -79,10 +132,16 @@ const props = defineProps<{
 
 
 
-function deleteEmployee(id: number) {
 
 
-    if (!confirm('آیا از حذف این پرسنل مطمئن هستید؟')) {
+
+function deleteEmployee(id:number)
+{
+
+
+    if(
+        !confirm('آیا از حذف این پرسنل مطمئن هستید؟')
+    ){
 
         return;
 
@@ -90,12 +149,22 @@ function deleteEmployee(id: number) {
 
 
 
+
     router.delete(
-        route('employees.destroy', id),
+
+        route(
+            'employees.destroy',
+            id
+        ),
+
         {
-            preserveScroll: true,
+
+            preserveScroll:true,
+
         }
+
     );
+
 
 }
 
@@ -105,10 +174,14 @@ function deleteEmployee(id: number) {
 
 
 
+
+
 <template>
 
 
-<Head title="مدیریت پرسنل" />
+<Head title="مدیریت پرسنل"/>
+
+
 
 
 
@@ -116,367 +189,488 @@ function deleteEmployee(id: number) {
 
 
 
-    <template #header>
+<template #header>
 
 
-        <h2 class="text-xl font-semibold text-gray-800">
+<h2 class="text-xl font-semibold text-gray-800">
 
-            مدیریت پرسنل
+مدیریت پرسنل
 
-        </h2>
+</h2>
 
 
-    </template>
+</template>
 
 
 
 
 
-    <div class="p-6">
 
 
+<div class="p-6">
 
-        <div class="rounded-lg bg-white shadow">
 
 
+<div class="rounded-lg bg-white shadow">
 
-            <div class="flex items-center justify-between border-b p-6">
 
 
-                <h3 class="text-lg font-semibold">
 
-                    لیست کارکنان
 
-                </h3>
 
+<div class="flex items-center justify-between border-b p-6">
 
 
+<h3 class="text-lg font-semibold">
 
-                <Link
+لیست کارکنان
 
-                    :href="route('employees.create')"
+</h3>
 
-                    class="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
 
-                >
 
-                    افزودن پرسنل
 
-                </Link>
+<Link
 
+:href="route('employees.create')"
 
-            </div>
+class="rounded-lg bg-blue-600 px-4 py-2 text-white hover:bg-blue-700"
 
+>
 
+افزودن پرسنل
 
+</Link>
 
 
 
-            <div class="overflow-x-auto p-6">
+</div>
 
 
-                <table class="w-full text-right">
 
 
 
-                    <thead>
 
 
-                        <tr class="border-b text-sm text-gray-500">
 
 
-                            <th class="pb-3">
+<div class="overflow-x-auto p-6">
 
-                                کد پرسنلی
 
-                            </th>
 
+<table class="w-full text-right">
 
 
-                            <th class="pb-3">
 
-                                نام و نام خانوادگی
 
-                            </th>
 
+<thead>
 
 
+<tr class="border-b text-sm text-gray-500">
 
-                            <th class="pb-3">
 
-                                کد ملی
 
-                            </th>
+<th class="pb-3">
 
+کد پرسنلی
 
+</th>
 
 
-                            <th class="pb-3">
 
-                                واحد
 
-                            </th>
+<th class="pb-3">
 
+نام و نام خانوادگی
 
+</th>
 
 
-                            <th class="pb-3">
 
-                                سمت
 
-                            </th>
+<th class="pb-3">
 
+کد ملی
 
+</th>
 
 
-                            <th class="pb-3">
 
-                                وضعیت
 
-                            </th>
+<th class="pb-3">
 
+واحد
 
+</th>
 
 
-                            <th class="pb-3">
 
-                                عملیات
 
-                            </th>
+<th class="pb-3">
 
+سمت
 
+</th>
 
-                        </tr>
 
 
-                    </thead>
 
+<th class="pb-3">
 
+شیفت
 
+</th>
 
 
 
-                    <tbody>
 
+<th class="pb-3">
 
+وضعیت
 
-                        <tr
+</th>
 
-                            v-for="employee in employees.data"
 
-                            :key="employee.id"
 
-                            class="border-b hover:bg-gray-50"
 
-                        >
+<th class="pb-3">
 
+عملیات
 
+</th>
 
 
-                            <td class="py-4">
 
-                                {{ employee.employee_code }}
+</tr>
 
-                            </td>
 
+</thead>
 
 
 
 
-                            <td class="py-4">
 
 
-                                {{ employee.first_name }}
 
-                                {{ employee.last_name }}
 
 
-                            </td>
+<tbody>
 
 
 
 
 
-                            <td class="py-4">
+<tr
 
-                                {{ employee.national_code }}
+v-for="employee in employees.data"
 
-                            </td>
+:key="employee.id"
 
+class="border-b hover:bg-gray-50"
 
+>
 
 
 
-                            <td class="py-4">
 
 
-                                {{ employee.department?.name ?? '-' }}
+<td class="py-4">
 
+{{ employee.employee_code }}
 
-                            </td>
+</td>
 
 
 
 
 
-                            <td class="py-4">
 
 
-                                {{ employee.position?.name ?? '-' }}
+<td class="py-4">
 
 
-                            </td>
+{{ employee.first_name }}
 
+{{ employee.last_name }}
 
 
+</td>
 
 
 
-                            <td class="py-4">
 
 
 
-                                <span
 
-                                    v-if="employee.status === 'active'"
+<td class="py-4">
 
-                                    class="rounded bg-green-100 px-3 py-1 text-green-700"
+{{ employee.national_code }}
 
-                                >
+</td>
 
-                                    فعال
 
-                                </span>
 
 
 
 
-                                <span
 
-                                    v-else
 
-                                    class="rounded bg-red-100 px-3 py-1 text-red-700"
+<td class="py-4">
 
-                                >
+{{ employee.department?.name ?? '-' }}
 
-                                    غیرفعال
+</td>
 
-                                </span>
 
 
 
-                            </td>
 
 
 
+<td class="py-4">
 
+{{ employee.position?.name ?? '-' }}
 
+</td>
 
 
-                            <td class="py-4 space-x-2">
 
 
 
-                                <Link
 
-                                    :href="route('employees.edit', employee.id)"
 
-                                    class="rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600"
 
-                                >
+<td class="py-4">
 
-                                    ویرایش
 
-                                </Link>
+<div v-if="employee.shift">
 
 
+<div class="font-semibold">
 
+{{ employee.shift.name }}
 
+</div>
 
-                                <button
 
-                                    @click="deleteEmployee(employee.id)"
+<div class="text-sm text-gray-500">
 
-                                    class="rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700"
 
-                                >
+{{ employee.shift.start_time }}
 
-                                    حذف
+تا
 
-                                </button>
+{{ employee.shift.end_time }}
 
 
+</div>
 
-                            </td>
 
+</div>
 
 
 
+<span v-else>
 
+-
 
-                        </tr>
+</span>
 
 
 
-                    </tbody>
+</td>
 
 
 
 
-                </table>
 
 
 
 
-            </div>
+<td class="py-4">
 
 
 
 
 
+<span
 
-            <div class="flex justify-center gap-2 border-t p-4">
+v-if="employee.status === 'active'"
 
+class="rounded bg-green-100 px-3 py-1 text-green-700"
 
-                <Link
+>
 
-                    v-for="link in employees.links"
+فعال
 
-                    :key="link.label"
+</span>
 
-                    :href="link.url ?? ''"
 
-                    v-html="link.label"
 
-                    class="rounded px-3 py-2 text-sm"
 
-                    :class="{
 
-                        'bg-blue-600 text-white': link.active,
+<span
 
-                        'bg-gray-100': !link.active
+v-else
 
-                    }"
+class="rounded bg-red-100 px-3 py-1 text-red-700"
 
-                />
+>
 
+غیرفعال
 
+</span>
 
-            </div>
 
 
 
 
-        </div>
+</td>
 
 
 
-    </div>
+
+
+
+
+
+
+<td class="py-4 space-x-2">
+
+
+
+
+
+<Link
+
+:href="route('employees.edit',employee.id)"
+
+class="rounded bg-yellow-500 px-3 py-1 text-white hover:bg-yellow-600"
+
+>
+
+ویرایش
+
+</Link>
+
+
+
+
+
+
+
+
+<button
+
+@click="deleteEmployee(employee.id)"
+
+class="rounded bg-red-600 px-3 py-1 text-white hover:bg-red-700"
+
+>
+
+حذف
+
+</button>
+
+
+
+
+
+
+
+</td>
+
+
+
+
+
+
+
+
+</tr>
+
+
+
+
+
+
+</tbody>
+
+
+
+
+
+
+</table>
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
+<div class="flex justify-center gap-2 border-t p-4">
+
+
+
+<Link
+
+v-for="link in employees.links"
+
+:key="link.label"
+
+:href="link.url ?? ''"
+
+v-html="link.label"
+
+class="rounded px-3 py-2 text-sm"
+
+:class="{
+
+'bg-blue-600 text-white':link.active,
+
+'bg-gray-100':!link.active
+
+}"
+
+/>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+</div>
+
+
+
+</div>
+
+
 
 
 
 
 </AuthenticatedLayout>
+
+
+
 
 
 

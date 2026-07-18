@@ -4,16 +4,39 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 
 
+
 interface Department {
+
     id:number;
+
     name:string;
+
 }
+
 
 
 interface Position {
+
     id:number;
+
     name:string;
+
 }
+
+
+
+interface Shift {
+
+    id:number;
+
+    name:string;
+
+    start_time:string;
+
+    end_time:string;
+
+}
+
 
 
 interface Employee {
@@ -34,11 +57,15 @@ interface Employee {
 
     position_id:number;
 
+    shift_id:number|null;
+
     hire_date:string|null;
 
     status:string;
 
 }
+
+
 
 
 
@@ -50,30 +77,47 @@ const props = defineProps<{
 
     positions:Position[];
 
+    shifts:Shift[];
+
 }>();
+
+
+
 
 
 
 
 const form = useForm({
 
-    employee_code: props.employee.employee_code,
 
-    first_name: props.employee.first_name,
+    employee_code:props.employee.employee_code,
 
-    last_name: props.employee.last_name,
 
-    national_code: props.employee.national_code,
+    first_name:props.employee.first_name,
 
-    mobile: props.employee.mobile ?? '',
 
-    department_id: props.employee.department_id,
+    last_name:props.employee.last_name,
 
-    position_id: props.employee.position_id,
 
-    hire_date: props.employee.hire_date ?? '',
+    national_code:props.employee.national_code,
 
-    status: props.employee.status,
+
+    mobile:props.employee.mobile ?? '',
+
+
+    department_id:props.employee.department_id,
+
+
+    position_id:props.employee.position_id,
+
+
+    shift_id:props.employee.shift_id ?? '',
+
+
+    hire_date:props.employee.hire_date ?? '',
+
+
+    status:props.employee.status,
 
 
 });
@@ -82,24 +126,39 @@ const form = useForm({
 
 
 
-function submit(){
+
+
+
+function submit()
+{
+
 
     form.put(
+
         route(
+
             'employees.update',
+
             props.employee.id
+
         ),
+
         {
 
             preserveScroll:true,
 
         }
+
     );
+
 
 }
 
 
+
 </script>
+
+
 
 
 
@@ -116,13 +175,17 @@ function submit(){
 
 <template #header>
 
+
 <h2 class="text-xl font-semibold text-gray-800">
 
 ویرایش پرسنل
 
 </h2>
 
+
 </template>
+
+
 
 
 
@@ -133,24 +196,36 @@ function submit(){
 
 
 <div
+
 v-if="Object.keys(form.errors).length"
+
 class="mb-5 rounded-lg bg-red-100 p-4 text-red-700"
+
 >
+
 
 <ul>
 
+
 <li
+
 v-for="error in form.errors"
+
 :key="error"
+
 >
 
 {{ error }}
 
 </li>
 
+
 </ul>
 
+
 </div>
+
+
 
 
 
@@ -166,7 +241,12 @@ class="space-y-5 rounded-lg bg-white p-6 shadow"
 
 
 
+
+
 <div class="grid grid-cols-2 gap-5">
+
+
+
 
 
 
@@ -189,6 +269,9 @@ class="w-full rounded border p-2"
 
 
 
+
+
+
 <div>
 
 <label>
@@ -204,6 +287,8 @@ class="w-full rounded border p-2"
 />
 
 </div>
+
+
 
 
 
@@ -229,6 +314,8 @@ class="w-full rounded border p-2"
 
 
 
+
+
 <div>
 
 <label>
@@ -249,6 +336,8 @@ class="w-full rounded border p-2"
 
 
 
+
+
 <div>
 
 <label>
@@ -264,6 +353,8 @@ class="w-full rounded border p-2"
 />
 
 </div>
+
+
 
 
 
@@ -291,11 +382,14 @@ class="w-full rounded border p-2"
 
 
 
+
+
 <div>
 
 <label>
 واحد سازمانی
 </label>
+
 
 
 <select
@@ -332,11 +426,13 @@ v-for="item in departments"
 
 
 
+
 <div>
 
 <label>
 سمت شغلی
 </label>
+
 
 
 <select
@@ -373,11 +469,92 @@ v-for="item in positions"
 
 
 
+
+
+<!-- Shift -->
+
+<div>
+
+<label>
+شیفت کاری
+</label>
+
+
+
+<select
+
+v-model="form.shift_id"
+
+class="w-full rounded border p-2"
+
+>
+
+
+<option value="">
+
+انتخاب کنید
+
+</option>
+
+
+
+<option
+
+v-for="shift in shifts"
+
+:key="shift.id"
+
+:value="shift.id"
+
+>
+
+{{ shift.name }}
+
+-
+
+{{ shift.start_time }}
+
+تا
+
+{{ shift.end_time }}
+
+</option>
+
+
+</select>
+
+
+
+<div
+
+v-if="form.errors.shift_id"
+
+class="mt-1 text-sm text-red-600"
+
+>
+
+{{ form.errors.shift_id }}
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+
+
+
 <div>
 
 <label>
 وضعیت
 </label>
+
 
 
 <select
@@ -412,7 +589,11 @@ class="w-full rounded border p-2"
 
 
 
+
+
 </div>
+
+
 
 
 
@@ -448,7 +629,13 @@ class="rounded bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
 
 
 
+
+
+
+
 </form>
+
+
 
 
 
@@ -456,7 +643,9 @@ class="rounded bg-blue-600 px-6 py-2 text-white hover:bg-blue-700"
 
 
 
+
 </AuthenticatedLayout>
+
 
 
 

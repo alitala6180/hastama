@@ -4,290 +4,558 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, useForm } from '@inertiajs/vue3';
 
 
+
 interface Department {
-    id: number;
-    name: string;
+
+    id:number;
+
+    name:string;
+
 }
+
 
 
 interface Position {
-    id: number;
-    name: string;
+
+    id:number;
+
+    name:string;
+
 }
 
 
+
+interface Shift {
+
+    id:number;
+
+    name:string;
+
+    start_time:string;
+
+    end_time:string;
+
+}
+
+
+
 const props = defineProps<{
-    departments: Department[];
-    positions: Position[];
+
+    departments:Department[];
+
+    positions:Position[];
+
+    shifts:Shift[];
+
 }>();
+
+
+
 
 
 const form = useForm({
 
-    employee_code: '',
-    first_name: '',
-    last_name: '',
-    national_code: '',
-    mobile: '',
-    department_id: '',
-    position_id: '',
-    hire_date: '',
+
+    employee_code:'',
+
+    first_name:'',
+
+    last_name:'',
+
+    national_code:'',
+
+    mobile:'',
+
+    department_id:'',
+
+    position_id:'',
+
+    shift_id:'',
+
+    hire_date:'',
+
+    status:'active',
+
 
 });
 
 
 
-function submit() {
 
-    form.post(route('employees.store'));
+
+function submit()
+{
+
+    form.post(
+        route('employees.store')
+    );
 
 }
+
 
 
 </script>
 
 
 
+
 <template>
 
-    <Head title="افزودن پرسنل" />
 
+<Head title="افزودن پرسنل" />
 
-    <AuthenticatedLayout>
 
 
-        <template #header>
+<AuthenticatedLayout>
 
-            <h2 class="text-xl font-semibold text-gray-800">
-                افزودن پرسنل جدید
-            </h2>
 
-        </template>
 
+<template #header>
 
+<h2 class="text-xl font-semibold text-gray-800">
 
-        <div class="p-6">
+افزودن پرسنل جدید
 
+</h2>
 
-            <div class="rounded-lg bg-white p-6 shadow">
+</template>
 
 
-                <form
-                    @submit.prevent="submit"
-                    class="space-y-6"
-                >
 
 
-                    <div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 
+<div class="p-6">
 
-                        <div>
 
-                            <label class="mb-2 block">
-                                کد پرسنلی
-                            </label>
 
-                            <input
-                                v-model="form.employee_code"
-                                type="text"
-                                class="w-full rounded border-gray-300"
-                            />
+<div class="rounded-lg bg-white p-6 shadow">
 
-                            <div
-                                v-if="form.errors.employee_code"
-                                class="mt-1 text-sm text-red-600"
-                            >
-                                {{ form.errors.employee_code }}
-                            </div>
 
-                        </div>
 
+<form
 
+@submit.prevent="submit"
 
+class="space-y-6"
 
-                        <div>
+>
 
-                            <label class="mb-2 block">
-                                نام
-                            </label>
 
-                            <input
-                                v-model="form.first_name"
-                                type="text"
-                                class="w-full rounded border-gray-300"
-                            />
 
-                        </div>
 
+<div class="grid grid-cols-1 gap-6 md:grid-cols-2">
 
 
 
-                        <div>
 
-                            <label class="mb-2 block">
-                                نام خانوادگی
-                            </label>
 
-                            <input
-                                v-model="form.last_name"
-                                type="text"
-                                class="w-full rounded border-gray-300"
-                            />
+<div>
 
-                        </div>
+<label class="mb-2 block">
 
+کد پرسنلی
 
+</label>
 
 
-                        <div>
+<input
 
-                            <label class="mb-2 block">
-                                کد ملی
-                            </label>
+v-model="form.employee_code"
 
-                            <input
-                                v-model="form.national_code"
-                                type="text"
-                                class="w-full rounded border-gray-300"
-                            />
+type="text"
 
-                        </div>
+class="w-full rounded border-gray-300"
 
+/>
 
 
+<div
+v-if="form.errors.employee_code"
+class="mt-1 text-sm text-red-600"
+>
 
-                        <div>
+{{ form.errors.employee_code }}
 
-                            <label class="mb-2 block">
-                                موبایل
-                            </label>
+</div>
 
-                            <input
-                                v-model="form.mobile"
-                                type="text"
-                                class="w-full rounded border-gray-300"
-                            />
 
-                        </div>
+</div>
 
 
 
 
-                        <div>
 
-                            <label class="mb-2 block">
-                                تاریخ استخدام
-                            </label>
 
-                            <input
-                                v-model="form.hire_date"
-                                type="date"
-                                class="w-full rounded border-gray-300"
-                            />
+<div>
 
-                        </div>
+<label class="mb-2 block">
 
+نام
 
+</label>
 
 
+<input
 
-                        <div>
+v-model="form.first_name"
 
-                            <label class="mb-2 block">
-                                واحد سازمانی
-                            </label>
+type="text"
 
+class="w-full rounded border-gray-300"
 
-                            <select
-                                v-model="form.department_id"
-                                class="w-full rounded border-gray-300"
-                            >
+/>
 
-                                <option value="">
-                                    انتخاب کنید
-                                </option>
 
+</div>
 
-                                <option
-                                    v-for="department in departments"
-                                    :key="department.id"
-                                    :value="department.id"
-                                >
-                                    {{ department.name }}
-                                </option>
 
 
-                            </select>
 
-                        </div>
 
 
+<div>
 
+<label class="mb-2 block">
 
+نام خانوادگی
 
-                        <div>
+</label>
 
-                            <label class="mb-2 block">
-                                سمت شغلی
-                            </label>
 
+<input
 
-                            <select
-                                v-model="form.position_id"
-                                class="w-full rounded border-gray-300"
-                            >
+v-model="form.last_name"
 
-                                <option value="">
-                                    انتخاب کنید
-                                </option>
+type="text"
 
+class="w-full rounded border-gray-300"
 
-                                <option
-                                    v-for="position in positions"
-                                    :key="position.id"
-                                    :value="position.id"
-                                >
-                                    {{ position.name }}
-                                </option>
+/>
 
 
-                            </select>
+</div>
 
-                        </div>
 
 
-                    </div>
 
 
 
+<div>
 
-                    <div class="flex justify-end">
+<label class="mb-2 block">
 
+کد ملی
 
-                        <button
-                            type="submit"
-                            :disabled="form.processing"
-                            class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 disabled:opacity-50"
-                        >
+</label>
 
-                            ذخیره
 
-                        </button>
+<input
 
+v-model="form.national_code"
 
-                    </div>
+type="text"
 
+class="w-full rounded border-gray-300"
 
-                </form>
+/>
 
 
-            </div>
+</div>
 
 
-        </div>
 
 
-    </AuthenticatedLayout>
+
+
+<div>
+
+<label class="mb-2 block">
+
+موبایل
+
+</label>
+
+
+<input
+
+v-model="form.mobile"
+
+type="text"
+
+class="w-full rounded border-gray-300"
+
+/>
+
+
+</div>
+
+
+
+
+
+
+<div>
+
+<label class="mb-2 block">
+
+تاریخ استخدام
+
+</label>
+
+
+<input
+
+v-model="form.hire_date"
+
+type="date"
+
+class="w-full rounded border-gray-300"
+
+/>
+
+
+</div>
+
+
+
+
+
+
+
+<div>
+
+<label class="mb-2 block">
+
+واحد سازمانی
+
+</label>
+
+
+<select
+
+v-model="form.department_id"
+
+class="w-full rounded border-gray-300"
+
+>
+
+
+<option value="">
+
+انتخاب کنید
+
+</option>
+
+
+<option
+
+v-for="department in departments"
+
+:key="department.id"
+
+:value="department.id"
+
+>
+
+{{ department.name }}
+
+</option>
+
+
+</select>
+
+
+</div>
+
+
+
+
+
+
+
+<div>
+
+<label class="mb-2 block">
+
+سمت شغلی
+
+</label>
+
+
+<select
+
+v-model="form.position_id"
+
+class="w-full rounded border-gray-300"
+
+>
+
+
+<option value="">
+
+انتخاب کنید
+
+</option>
+
+
+<option
+
+v-for="position in positions"
+
+:key="position.id"
+
+:value="position.id"
+
+>
+
+{{ position.name }}
+
+</option>
+
+
+</select>
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- Shift -->
+
+
+<div>
+
+
+<label class="mb-2 block">
+
+شیفت کاری
+
+</label>
+
+
+
+<select
+
+v-model="form.shift_id"
+
+class="w-full rounded border-gray-300"
+
+>
+
+
+<option value="">
+
+انتخاب کنید
+
+</option>
+
+
+
+<option
+
+v-for="shift in shifts"
+
+:key="shift.id"
+
+:value="shift.id"
+
+>
+
+
+{{ shift.name }}
+
+-
+
+{{ shift.start_time }}
+
+تا
+
+{{ shift.end_time }}
+
+
+</option>
+
+
+
+</select>
+
+
+
+<div
+
+v-if="form.errors.shift_id"
+
+class="mt-1 text-sm text-red-600"
+
+>
+
+{{ form.errors.shift_id }}
+
+</div>
+
+
+
+</div>
+
+
+
+
+
+
+</div>
+
+
+
+
+
+
+
+<div class="flex justify-end">
+
+
+<button
+
+type="submit"
+
+:disabled="form.processing"
+
+class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 disabled:opacity-50"
+
+>
+
+ذخیره
+
+</button>
+
+
+
+</div>
+
+
+
+
+
+
+</form>
+
+
+
+
+</div>
+
+
+
+</div>
+
+
+
+
+</AuthenticatedLayout>
 
 
 </template>

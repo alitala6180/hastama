@@ -4,41 +4,53 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
+
 class StoreEmployeeRequest extends FormRequest
 {
+
+
     public function authorize(): bool
     {
-        return true;
+
+        return $this->user()?->can('employees.create') ?? false;
+
     }
+
+
+
 
 
     public function rules(): array
     {
+
         return [
 
-            'employee_code' => [
+            'employee_code'=>[
                 'required',
                 'string',
-                'unique:employees,employee_code',
                 'max:50',
+                'unique:employees,employee_code',
             ],
 
 
-            'first_name' => [
+
+            'first_name'=>[
                 'required',
                 'string',
                 'max:100',
             ],
 
 
-            'last_name' => [
+
+            'last_name'=>[
                 'required',
                 'string',
                 'max:100',
             ],
 
 
-            'national_code' => [
+
+            'national_code'=>[
                 'nullable',
                 'string',
                 'max:10',
@@ -46,36 +58,50 @@ class StoreEmployeeRequest extends FormRequest
             ],
 
 
-            'department_id' => [
+
+            'department_id'=>[
                 'required',
                 'exists:departments,id',
             ],
 
 
-            'position_id' => [
+
+            'position_id'=>[
                 'required',
                 'exists:positions,id',
             ],
 
 
-            'mobile' => [
+
+            'shift_id'=>[
+                'nullable',
+                'exists:shifts,id',
+            ],
+
+
+
+            'mobile'=>[
                 'nullable',
                 'string',
                 'max:20',
             ],
 
 
-            'hire_date' => [
+
+            'hire_date'=>[
                 'nullable',
                 'date',
             ],
 
 
-            'status' => [
-                'nullable',
+
+            'status'=>[
+                'required',
                 'in:active,inactive',
             ],
 
         ];
+
     }
+
 }
