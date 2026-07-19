@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests;
 
+
 use Illuminate\Foundation\Http\FormRequest;
+
 
 
 class UpdateLeaveRequest extends FormRequest
@@ -11,8 +13,14 @@ class UpdateLeaveRequest extends FormRequest
 
     public function authorize(): bool
     {
-        return true;
+
+        return $this->user()?->can('leaves.edit') ?? false;
+
     }
+
+
+
+
 
 
 
@@ -20,7 +28,22 @@ class UpdateLeaveRequest extends FormRequest
     public function rules(): array
     {
 
+
         return [
+
+
+
+            'employee_id'=>[
+
+                'required',
+
+                'exists:employees,id',
+
+            ],
+
+
+
+
 
 
             'type'=>[
@@ -34,6 +57,8 @@ class UpdateLeaveRequest extends FormRequest
 
 
 
+
+
             'start_date'=>[
 
                 'required',
@@ -41,6 +66,8 @@ class UpdateLeaveRequest extends FormRequest
                 'date',
 
             ],
+
+
 
 
 
@@ -58,9 +85,11 @@ class UpdateLeaveRequest extends FormRequest
 
 
 
+
+
             'days'=>[
 
-                'required',
+                'nullable',
 
                 'numeric',
 
@@ -70,19 +99,24 @@ class UpdateLeaveRequest extends FormRequest
 
 
 
-
             'reason'=>[
 
                 'nullable',
 
                 'string',
 
+                'max:500',
+
             ],
+
+
 
 
         ];
 
+
     }
+
 
 
 }

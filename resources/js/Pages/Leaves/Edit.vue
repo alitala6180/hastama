@@ -5,6 +5,7 @@ import { Head, useForm } from '@inertiajs/vue3';
 
 
 
+
 interface Employee {
 
     id:number;
@@ -21,7 +22,30 @@ interface Employee {
 
 
 
+interface Leave {
+
+    id:number;
+
+    employee_id:number;
+
+    type:string;
+
+    from_date:string;
+
+    to_date:string;
+
+    reason:string|null;
+
+}
+
+
+
+
+
+
 const props = defineProps<{
+
+    leave:Leave;
 
     employees:Employee[];
 
@@ -33,21 +57,29 @@ const props = defineProps<{
 
 
 
+
+
 const form = useForm({
 
 
-    employee_id:'',
+    employee_id:props.leave.employee_id,
 
-    type:'annual',
 
-    from_date:'',
+    type:props.leave.type,
 
-    to_date:'',
 
-    reason:'',
+    from_date:props.leave.from_date,
+
+
+    to_date:props.leave.to_date,
+
+
+    reason:props.leave.reason ?? '',
+
 
 
 });
+
 
 
 
@@ -60,9 +92,21 @@ function submit()
 {
 
 
-    form.post(
+    form.put(
 
-        route('leaves.store')
+        route(
+
+            'leaves.update',
+
+            props.leave.id
+
+        ),
+
+        {
+
+            preserveScroll:true,
+
+        }
 
     );
 
@@ -85,7 +129,7 @@ function submit()
 <template>
 
 
-<Head title="ثبت مرخصی"/>
+<Head title="ویرایش مرخصی"/>
 
 
 
@@ -101,7 +145,7 @@ function submit()
 
 <h2 class="text-xl font-semibold text-gray-800">
 
-ثبت درخواست مرخصی
+ویرایش درخواست مرخصی
 
 </h2>
 
@@ -115,12 +159,12 @@ function submit()
 
 
 
-
 <div class="p-6">
 
 
 
 <div class="rounded-lg bg-white p-6 shadow">
+
 
 
 
@@ -164,6 +208,7 @@ v-for="error in form.errors"
 
 
 
+
 <form
 
 @submit.prevent="submit"
@@ -191,7 +236,6 @@ class="space-y-6"
 
 
 
-
 <select
 
 v-model="form.employee_id"
@@ -199,14 +243,6 @@ v-model="form.employee_id"
 class="w-full rounded border-gray-300"
 
 >
-
-
-<option value="">
-
-انتخاب کنید
-
-</option>
-
 
 
 <option
@@ -236,7 +272,6 @@ v-for="employee in employees"
 </select>
 
 
-
 </div>
 
 
@@ -258,8 +293,6 @@ v-for="employee in employees"
 
 
 
-
-
 <select
 
 v-model="form.type"
@@ -267,7 +300,6 @@ v-model="form.type"
 class="w-full rounded border-gray-300"
 
 >
-
 
 
 <option value="annual">
@@ -305,7 +337,6 @@ class="w-full rounded border-gray-300"
 </select>
 
 
-
 </div>
 
 
@@ -330,7 +361,6 @@ class="w-full rounded border-gray-300"
 از تاریخ
 
 </label>
-
 
 
 
@@ -367,7 +397,6 @@ class="w-full rounded border-gray-300"
 
 
 
-
 <input
 
 type="date"
@@ -401,7 +430,7 @@ class="w-full rounded border-gray-300"
 
 <label class="mb-2 block">
 
-دلیل درخواست
+دلیل
 
 </label>
 
@@ -416,7 +445,6 @@ rows="4"
 class="w-full rounded border-gray-300"
 
 ></textarea>
-
 
 
 </div>
@@ -448,20 +476,21 @@ class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
 
 <span v-if="form.processing">
 
-در حال ثبت...
+در حال ذخیره...
 
 </span>
 
 
 <span v-else>
 
-ثبت درخواست
+ذخیره تغییرات
 
 </span>
 
 
 
 </button>
+
 
 
 
@@ -486,13 +515,14 @@ class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
 
 
 
-
 </div>
 
 
 
-</div>
 
+
+
+</div>
 
 
 
@@ -500,6 +530,8 @@ class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
 
 
 </AuthenticatedLayout>
+
+
 
 
 

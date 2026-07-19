@@ -19,6 +19,7 @@ interface Employee {
 
 
 
+
 interface Leave {
 
 
@@ -26,9 +27,9 @@ interface Leave {
 
     type:string;
 
-    start_date:string;
+    from_date:string;
 
-    end_date:string;
+    to_date:string;
 
     days:number;
 
@@ -40,7 +41,6 @@ interface Leave {
 
 
 }
-
 
 
 
@@ -87,7 +87,7 @@ function approve(id:number)
 {
 
 
-    if(!confirm('تایید این مرخصی انجام شود؟'))
+    if(!confirm('تایید این درخواست؟'))
         return;
 
 
@@ -95,11 +95,8 @@ function approve(id:number)
     router.patch(
 
         route(
-
             'leaves.approve',
-
             id
-
         )
 
     );
@@ -113,12 +110,12 @@ function approve(id:number)
 
 
 
+
 function reject(id:number)
 {
 
 
-    if(!confirm('رد این مرخصی انجام شود؟'))
-
+    if(!confirm('رد این درخواست؟'))
         return;
 
 
@@ -126,11 +123,36 @@ function reject(id:number)
     router.patch(
 
         route(
-
             'leaves.reject',
-
             id
+        )
 
+    );
+
+
+}
+
+
+
+
+
+
+
+
+function destroy(id:number)
+{
+
+
+    if(!confirm('حذف این درخواست؟'))
+        return;
+
+
+
+    router.delete(
+
+        route(
+            'leaves.destroy',
+            id
         )
 
     );
@@ -147,9 +169,7 @@ function reject(id:number)
 function typeText(type:string)
 {
 
-
-    const types:any = {
-
+    return {
 
         annual:'استحقاقی',
 
@@ -159,13 +179,7 @@ function typeText(type:string)
 
         unpaid:'بدون حقوق'
 
-
-    };
-
-
-
-    return types[type] ?? type;
-
+    }[type] ?? type;
 
 }
 
@@ -178,9 +192,7 @@ function typeText(type:string)
 function statusText(status:string)
 {
 
-
-    const statuses:any = {
-
+    return {
 
         pending:'در انتظار',
 
@@ -188,20 +200,14 @@ function statusText(status:string)
 
         rejected:'رد شده'
 
-
-    };
-
-
-
-    return statuses[status] ?? status;
-
+    }[status] ?? status;
 
 }
 
 
 
-</script>
 
+</script>
 
 
 
@@ -216,10 +222,7 @@ function statusText(status:string)
 
 
 
-
 <AuthenticatedLayout>
-
-
 
 
 <template #header>
@@ -239,9 +242,7 @@ function statusText(status:string)
 
 
 
-
 <div class="p-6">
-
 
 
 <div class="rounded-lg bg-white shadow">
@@ -250,16 +251,15 @@ function statusText(status:string)
 
 
 
-
 <div class="flex justify-between border-b p-6">
-
 
 
 <h3 class="text-lg font-semibold">
 
-لیست درخواست‌ها
+درخواست‌های مرخصی
 
 </h3>
+
 
 
 
@@ -268,14 +268,13 @@ function statusText(status:string)
 
 :href="route('leaves.create')"
 
-class="rounded-lg bg-blue-600 px-5 py-2 text-white"
+class="rounded bg-blue-600 px-5 py-2 text-white"
 
 >
 
-➕ درخواست مرخصی
+ثبت درخواست
 
 </Link>
-
 
 
 </div>
@@ -286,10 +285,7 @@ class="rounded-lg bg-blue-600 px-5 py-2 text-white"
 
 
 
-
-
 <div class="overflow-x-auto p-6">
-
 
 
 <table class="w-full text-right">
@@ -299,52 +295,45 @@ class="rounded-lg bg-blue-600 px-5 py-2 text-white"
 <thead>
 
 
-<tr class="border-b bg-gray-50">
+<tr class="border-b text-gray-500">
 
 
-<th class="p-4">
+<th class="p-3">
 
-کارمند
+پرسنل
 
 </th>
 
 
-<th class="p-4">
+<th class="p-3">
 
 نوع
 
 </th>
 
 
-<th class="p-4">
+<th class="p-3">
 
-از تاریخ
-
-</th>
-
-
-<th class="p-4">
-
-تا تاریخ
+بازه
 
 </th>
 
 
-<th class="p-4">
+<th class="p-3">
 
 روز
 
 </th>
 
 
-<th class="p-4">
+<th class="p-3">
 
 وضعیت
 
 </th>
 
 
-<th class="p-4">
+<th class="p-3">
 
 عملیات
 
@@ -361,7 +350,6 @@ class="rounded-lg bg-blue-600 px-5 py-2 text-white"
 
 
 
-
 <tbody>
 
 
@@ -372,19 +360,18 @@ v-for="leave in leaves.data"
 
 :key="leave.id"
 
-class="border-b"
+class="border-b hover:bg-gray-50"
 
 >
 
 
 
-<td class="p-4">
+<td class="p-3">
 
 
 {{leave.employee.first_name}}
 
 {{leave.employee.last_name}}
-
 
 
 <div class="text-sm text-gray-500">
@@ -400,9 +387,7 @@ class="border-b"
 
 
 
-
-
-<td class="p-4">
+<td class="p-3">
 
 {{typeText(leave.type)}}
 
@@ -412,23 +397,13 @@ class="border-b"
 
 
 
+<td class="p-3">
 
+{{leave.from_date}}
 
-<td class="p-4">
+<br>
 
-{{leave.start_date}}
-
-</td>
-
-
-
-
-
-
-
-<td class="p-4">
-
-{{leave.end_date}}
+{{leave.to_date}}
 
 </td>
 
@@ -436,9 +411,7 @@ class="border-b"
 
 
 
-
-
-<td class="p-4">
+<td class="p-3">
 
 {{leave.days}}
 
@@ -448,9 +421,7 @@ class="border-b"
 
 
 
-
-
-<td class="p-4">
+<td class="p-3">
 
 
 <span
@@ -467,7 +438,6 @@ class="rounded bg-green-100 px-3 py-1 text-green-700"
 
 
 
-
 <span
 
 v-else-if="leave.status==='rejected'"
@@ -479,7 +449,6 @@ class="rounded bg-red-100 px-3 py-1 text-red-700"
 {{statusText(leave.status)}}
 
 </span>
-
 
 
 
@@ -505,8 +474,7 @@ class="rounded bg-yellow-100 px-3 py-1 text-yellow-700"
 
 
 
-
-<td class="p-4 space-x-2">
+<td class="space-x-2 p-3">
 
 
 
@@ -545,15 +513,43 @@ class="rounded bg-red-600 px-3 py-1 text-white"
 
 
 
+
+<Link
+
+:href="route('leaves.edit',leave.id)"
+
+class="rounded bg-yellow-500 px-3 py-1 text-white"
+
+>
+
+ویرایش
+
+</Link>
+
+
+
+
+
+<button
+
+@click="destroy(leave.id)"
+
+class="rounded bg-gray-700 px-3 py-1 text-white"
+
+>
+
+حذف
+
+</button>
+
+
+
 </td>
 
 
 
 
-
 </tr>
-
-
 
 
 
@@ -566,6 +562,7 @@ class="rounded bg-red-600 px-3 py-1 text-white"
 
 
 </div>
+
 
 
 
@@ -595,12 +592,7 @@ class="rounded px-3 py-2"
 
 }"
 
->
-
-
-
-</Link>
-
+></Link>
 
 
 </div>
@@ -609,9 +601,7 @@ class="rounded px-3 py-2"
 
 
 
-
 </div>
-
 
 </div>
 
@@ -620,9 +610,6 @@ class="rounded px-3 py-2"
 
 
 </AuthenticatedLayout>
-
-
-
 
 
 </template>

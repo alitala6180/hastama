@@ -79,8 +79,23 @@ Route::middleware('auth')->group(function () {
     */
 
     Route::resource('leaves', LeaveController::class)
-        ->only(['index', 'create', 'store'])
+        ->except(['show'])
         ->middleware('permission:leave.view|leave.manage');
+
+
+
+    Route::patch(
+        'leaves/{leaf}/approve',
+        [LeaveController::class, 'approve']
+    )
+    ->name('leaves.approve');
+
+
+    Route::patch(
+        'leaves/{leaf}/reject',
+        [LeaveController::class, 'reject']
+    )
+    ->name('leaves.reject');
 
 
 

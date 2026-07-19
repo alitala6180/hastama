@@ -7,6 +7,7 @@ use App\Models\Leave;
 use App\Models\Employee;
 
 use App\Http\Requests\StoreLeaveRequest;
+use App\Http\Requests\UpdateLeaveRequest;
 
 use Illuminate\Http\Request;
 
@@ -16,6 +17,7 @@ use Inertia\Inertia;
 
 class LeaveController extends Controller
 {
+
 
 
     public function index()
@@ -111,21 +113,31 @@ class LeaveController extends Controller
 
 
         abort_unless(
-
-            $request->user()->can('leaves.create'),
-
+            $request->user()->can('leave.manage'),
             403
+        );
+
+
+
+
+        $data = $request->validated();
+
+
+
+
+        $data['days'] = $this->calculateDays(
+
+            $data['from_date'],
+
+            $data['to_date']
 
         );
 
 
 
 
-        Leave::create(
+        Leave::create($data);
 
-            $request->validated()
-
-        );
 
 
 
@@ -153,9 +165,70 @@ class LeaveController extends Controller
 
 
 
+    public function edit(Leave $leave)
+    {
 
 
-    public function approve(
+        abort_unless(
+            request()->user()->can('leave.manage'),
+            403
+        );
+
+
+
+
+        return Inertia::render(
+
+            'Leaves/Edit',
+
+            [
+
+
+                'leave'=>$leave,
+
+
+
+                'employees'=>Employee::where(
+
+                    'status',
+
+                    'active'
+
+                )
+
+                ->select(
+
+                    'id',
+
+                    'first_name',
+
+                    'last_name',
+
+                    'employee_code'
+
+                )
+
+                ->get()
+
+
+            ]
+
+        );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    public function update(
+
+        UpdateLeaveRequest $request,
 
         Leave $leave
 
@@ -164,12 +237,72 @@ class LeaveController extends Controller
 
 
         abort_unless(
-
-            request()->user()->can('leaves.approve'),
-
+            $request->user()->can('leave.manage'),
             403
+        );
+
+
+
+
+
+        $data = $request->validated();
+
+
+
+
+
+        $data['days'] = $this->calculateDays(
+
+            $data['from_date'],
+
+            $data['to_date']
 
         );
+
+
+
+
+
+
+        $leave->update($data);
+
+
+
+
+
+        return redirect()
+
+            ->route('leaves.index')
+
+            ->with(
+
+                'success',
+
+                'مرخصی بروزرسانی شد'
+
+            );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    public function approve(Leave $leave)
+    {
+
+
+        abort_unless(
+            request()->user()->can('leave.manage'),
+            403
+        );
+
+
 
 
 
@@ -185,6 +318,8 @@ class LeaveController extends Controller
 
 
         ]);
+
+
 
 
 
@@ -211,21 +346,16 @@ class LeaveController extends Controller
 
 
 
-    public function reject(
-
-        Leave $leave
-
-    )
+    public function reject(Leave $leave)
     {
 
 
         abort_unless(
-
-            request()->user()->can('leaves.approve'),
-
+            request()->user()->can('leave.manage'),
             403
-
         );
+
+
 
 
 
@@ -246,6 +376,8 @@ class LeaveController extends Controller
 
 
 
+
+
         return back()
 
             ->with(
@@ -255,6 +387,85 @@ class LeaveController extends Controller
                 'مرخصی رد شد'
 
             );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    public function destroy(Leave $leave)
+    {
+
+
+        abort_unless(
+            request()->user()->can('leave.manage'),
+            403
+        );
+
+
+
+
+
+
+
+        $leave->delete();
+
+
+
+
+
+
+
+        return back()
+
+            ->with(
+
+                'success',
+
+                'درخواست مرخصی حذف شد'
+
+            );
+
+
+    }
+
+
+
+
+
+
+
+
+
+    private function calculateDays(
+
+        $start,
+
+        $end
+
+    )
+    {
+
+
+        $startDate = \Carbon\Carbon::parse($start);
+
+
+        $endDate = \Carbon\Carbon::parse($end);
+
+
+
+
+        return $startDate->diffInDays(
+
+            $endDate
+
+        ) + 1;
 
 
     }

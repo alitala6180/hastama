@@ -8,11 +8,12 @@ use Illuminate\Foundation\Http\FormRequest;
 class StoreLeaveRequest extends FormRequest
 {
 
-
     public function authorize(): bool
     {
-        return true;
+        return $this->user()
+            ?->can('leave.manage') ?? false;
     }
+
 
 
 
@@ -22,78 +23,42 @@ class StoreLeaveRequest extends FormRequest
 
         return [
 
-
             'employee_id'=>[
-
                 'required',
-
                 'exists:employees,id',
-
             ],
-
-
 
 
             'type'=>[
-
                 'required',
-
                 'in:annual,sick,hourly,unpaid',
-
             ],
 
 
-
-
-
-            'start_date'=>[
-
+            'from_date'=>[
                 'required',
-
                 'date',
-
             ],
 
 
-
-
-            'end_date'=>[
-
+            'to_date'=>[
                 'required',
-
                 'date',
-
-                'after_or_equal:start_date',
-
+                'after_or_equal:from_date',
             ],
-
-
-
 
 
             'days'=>[
-
-                'required',
-
+                'nullable',
                 'numeric',
-
                 'min:0.5',
-
             ],
-
-
-
 
 
             'reason'=>[
-
                 'nullable',
-
                 'string',
-
             ],
-
-
 
         ];
 
