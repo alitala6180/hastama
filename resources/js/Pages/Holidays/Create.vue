@@ -5,54 +5,20 @@ import { Head, useForm } from '@inertiajs/vue3';
 
 
 
-interface Shift {
-
-    id:number;
-
-    name:string;
-
-    start_time:string;
-
-    end_time:string;
-
-    description:string|null;
-
-    is_active:boolean;
-
-}
-
-
-
-
-const props = defineProps<{
-
-    shift:Shift;
-
-}>();
-
-
-
-
-
 
 const form = useForm({
 
-    name:props.shift.name,
+    title:'',
 
-    start_time:props.shift.start_time 
-        ? props.shift.start_time.substring(0,5)
-        : '',
+    holiday_date:'',
 
-    end_time:props.shift.end_time 
-        ? props.shift.end_time.substring(0,5)
-        : '',
+    type:'official',
 
-    description:props.shift.description ?? '',
+    description:'',
 
-    is_active:props.shift.is_active,
+    is_active:true,
 
 });
-
 
 
 
@@ -62,23 +28,13 @@ const form = useForm({
 function submit()
 {
 
-    form.put(
+    form.post(
 
-        route(
-            'shifts.update',
-            props.shift.id
-        ),
-
-        {
-
-            preserveScroll:true,
-
-        }
+        route('holidays.store')
 
     );
 
 }
-
 
 
 
@@ -88,11 +44,10 @@ function submit()
 
 
 
-
 <template>
 
 
-<Head title="ویرایش شیفت"/>
+<Head title="افزودن تعطیلی"/>
 
 
 
@@ -102,19 +57,17 @@ function submit()
 
 
 
-
 <template #header>
 
 
 <h2 class="text-xl font-semibold text-gray-800">
 
-ویرایش شیفت کاری
+افزودن تعطیلی جدید
 
 </h2>
 
 
 </template>
-
 
 
 
@@ -147,13 +100,12 @@ class="space-y-6"
 
 
 
-
 <div>
 
 
 <label class="mb-2 block">
 
-نام شیفت
+عنوان تعطیلی
 
 </label>
 
@@ -161,7 +113,9 @@ class="space-y-6"
 
 <input
 
-v-model="form.name"
+v-model="form.title"
+
+type="text"
 
 class="w-full rounded border-gray-300"
 
@@ -169,15 +123,17 @@ class="w-full rounded border-gray-300"
 
 
 
+
+
 <div
 
-v-if="form.errors.name"
+v-if="form.errors.title"
 
 class="mt-1 text-sm text-red-600"
 
 >
 
-{{ form.errors.name }}
+{{ form.errors.title }}
 
 </div>
 
@@ -204,7 +160,7 @@ class="mt-1 text-sm text-red-600"
 
 <label class="mb-2 block">
 
-ساعت شروع
+تاریخ تعطیلی
 
 </label>
 
@@ -212,13 +168,29 @@ class="mt-1 text-sm text-red-600"
 
 <input
 
-v-model="form.start_time"
+v-model="form.holiday_date"
 
-type="time"
+type="date"
 
 class="w-full rounded border-gray-300"
 
 />
+
+
+
+
+
+<div
+
+v-if="form.errors.holiday_date"
+
+class="mt-1 text-sm text-red-600"
+
+>
+
+{{ form.errors.holiday_date }}
+
+</div>
 
 
 
@@ -236,25 +208,53 @@ class="w-full rounded border-gray-300"
 
 <label class="mb-2 block">
 
-ساعت پایان
+نوع تعطیلی
 
 </label>
 
 
 
-<input
+<select
 
-v-model="form.end_time"
-
-type="time"
+v-model="form.type"
 
 class="w-full rounded border-gray-300"
 
-/>
+>
+
+
+
+<option value="official">
+
+رسمی
+
+</option>
+
+
+
+<option value="weekly">
+
+هفتگی
+
+</option>
+
+
+
+<option value="company">
+
+سازمانی
+
+</option>
+
+
+
+</select>
 
 
 
 </div>
+
+
 
 
 
@@ -309,6 +309,7 @@ class="w-full rounded border-gray-300"
 <label class="flex items-center gap-2">
 
 
+
 <input
 
 type="checkbox"
@@ -318,6 +319,7 @@ v-model="form.is_active"
 />
 
 
+
 <span>
 
 فعال باشد
@@ -325,8 +327,8 @@ v-model="form.is_active"
 </span>
 
 
-</label>
 
+</label>
 
 
 </div>
@@ -349,7 +351,7 @@ type="submit"
 
 :disabled="form.processing"
 
-class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
+class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700 disabled:opacity-50"
 
 >
 
@@ -363,9 +365,10 @@ class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
 
 <span v-else>
 
-ذخیره تغییرات
+ذخیره تعطیلی
 
 </span>
+
 
 
 </button>
@@ -389,16 +392,14 @@ class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
 
 
 
-
 </div>
 
 
 
 
 
-
-
 </div>
+
 
 
 
@@ -407,6 +408,7 @@ class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
 
 
 </AuthenticatedLayout>
+
 
 
 

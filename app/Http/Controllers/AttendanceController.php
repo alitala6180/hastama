@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Attendance;
 use App\Models\Employee;
+use App\Models\Holiday;
 
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -83,6 +84,22 @@ class AttendanceController extends Controller
         ])
 
         ->get();
+
+        $employees->each(function($employee) use ($date){
+
+            $employee->holiday = Holiday::where(
+                'holiday_date',
+                $date
+            )
+
+            ->where(
+                'is_active',
+                true
+            )
+
+            ->first();
+
+        });
 
 
 
@@ -493,6 +510,34 @@ class AttendanceController extends Controller
     ){
 
 
+        $holiday = Holiday::where(
+            'holiday_date',
+            $date
+        )
+
+        ->where(
+            'is_active',
+            true
+        )
+
+        ->first();
+
+
+
+        if($holiday)
+        {
+
+            return [
+
+                'worked_minutes'=>0,
+
+                'late_minutes'=>0,
+
+                'overtime_minutes'=>0,
+
+            ];
+
+        }
 
         $workedMinutes = 0;
 

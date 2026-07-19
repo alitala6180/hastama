@@ -2,19 +2,29 @@
 
 namespace App\Models;
 
+
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+
+
 
 class Leave extends Model
 {
+
+    use HasFactory;
+
+
+
     protected $fillable = [
+
 
         'employee_id',
 
         'type',
 
-        'from_date',
+        'start_date',
 
-        'to_date',
+        'end_date',
 
         'days',
 
@@ -24,30 +34,60 @@ class Leave extends Model
 
         'approved_by',
 
-        'approved_at',
 
     ];
+
+
+
+
 
     protected $casts = [
 
-        'from_date' => 'date',
 
-        'to_date' => 'date',
+        'start_date'=>'date',
 
-        'approved_at' => 'datetime',
+        'end_date'=>'date',
+
 
     ];
 
+
+
+
+
+
+
     public function employee()
     {
-        return $this->belongsTo(Employee::class);
+
+        return $this->belongsTo(
+
+            Employee::class
+
+        );
+
     }
+
+
+
+
+
+
 
     public function approver()
     {
+
         return $this->belongsTo(
+
             User::class,
+
             'approved_by'
+
         );
+
     }
+
+
+
+
 }

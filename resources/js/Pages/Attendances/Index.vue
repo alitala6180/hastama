@@ -5,6 +5,20 @@ import { Head, Link, router } from '@inertiajs/vue3';
 
 
 
+interface Shift {
+
+    id:number;
+
+    name:string;
+
+    start_time:string;
+
+    end_time:string;
+
+}
+
+
+
 interface Attendance {
 
     id:number;
@@ -23,6 +37,20 @@ interface Attendance {
 
 
 
+interface Holiday {
+
+    id:number;
+
+    title:string;
+
+    type:string;
+
+    holiday_date:string;
+
+}
+
+
+
 interface Employee {
 
     id:number;
@@ -33,9 +61,15 @@ interface Employee {
 
     employee_code:string;
 
+    shift?:Shift|null;
+
     attendances:Attendance[];
 
+    holiday?:Holiday|null;
+
 }
+
+
 
 
 
@@ -44,7 +78,9 @@ interface Props {
     employees:Employee[];
 
     filters:{
+
         date:string;
+
     };
 
 }
@@ -52,6 +88,7 @@ interface Props {
 
 
 const props = defineProps<Props>();
+
 
 
 
@@ -68,15 +105,40 @@ function getAttendance(employee:Employee)
 
 
 
-function checkIn(employeeId:number)
+
+function formatTime(time:string|null)
+{
+
+    if(!time)
+        return '-';
+
+
+    return time.substring(11,16);
+
+}
+
+
+
+
+
+
+function checkIn(id:number)
 {
 
     router.post(
 
         route(
             'attendances.checkIn',
-            employeeId
-        )
+            id
+        ),
+
+        {},
+
+        {
+
+            preserveScroll:true
+
+        }
 
     );
 
@@ -86,19 +148,30 @@ function checkIn(employeeId:number)
 
 
 
-function checkOut(employeeId:number)
+
+function checkOut(id:number)
 {
 
     router.post(
 
         route(
             'attendances.checkOut',
-            employeeId
-        )
+            id
+        ),
+
+        {},
+
+        {
+
+            preserveScroll:true
+
+        }
 
     );
 
 }
+
+
 
 
 
@@ -107,18 +180,9 @@ function checkOut(employeeId:number)
 function formatMinutes(minutes:number)
 {
 
-    if(!minutes)
-        return '0:00';
+    const hours=Math.floor(minutes/60);
 
-
-
-    const hours = Math.floor(
-        minutes / 60
-    );
-
-
-    const mins = minutes % 60;
-
+    const mins=minutes%60;
 
 
     return `${hours}:${mins
@@ -129,7 +193,10 @@ function formatMinutes(minutes:number)
 
 
 
+
 </script>
+
+
 
 
 
@@ -143,7 +210,9 @@ function formatMinutes(minutes:number)
 <AuthenticatedLayout>
 
 
+
 <template #header>
+
 
 <h2 class="text-xl font-semibold text-gray-800">
 
@@ -151,7 +220,11 @@ function formatMinutes(minutes:number)
 
 </h2>
 
+
 </template>
+
+
+
 
 
 
@@ -164,10 +237,10 @@ function formatMinutes(minutes:number)
 
 
 
-<!-- Header -->
 
 
-<div class="flex items-center justify-between border-b p-6">
+<div class="flex justify-between border-b p-6">
+
 
 
 <div>
@@ -180,12 +253,12 @@ function formatMinutes(minutes:number)
 </h3>
 
 
-<p class="mt-1 text-sm text-gray-500">
+<div class="text-sm text-gray-500">
 
 تاریخ:
 {{ filters.date }}
 
-</p>
+</div>
 
 
 </div>
@@ -197,11 +270,11 @@ function formatMinutes(minutes:number)
 
 :href="route('attendances.create')"
 
-class="rounded-lg bg-blue-600 px-5 py-2 text-white hover:bg-blue-700"
+class="rounded-lg bg-blue-600 px-5 py-2 text-white"
 
 >
 
-➕ ثبت حضور دستی
+ثبت دستی
 
 </Link>
 
@@ -218,7 +291,6 @@ class="rounded-lg bg-blue-600 px-5 py-2 text-white hover:bg-blue-700"
 <div class="overflow-x-auto p-6">
 
 
-
 <table class="w-full text-right">
 
 
@@ -226,40 +298,45 @@ class="rounded-lg bg-blue-600 px-5 py-2 text-white hover:bg-blue-700"
 <thead>
 
 
-<tr class="border-b bg-gray-50 text-sm text-gray-600">
+<tr class="border-b bg-gray-50">
 
 
-<th class="p-4">
+<th class="p-3">
 پرسنل
 </th>
 
 
-<th class="p-4">
-ساعت ورود
+<th class="p-3">
+شیفت
 </th>
 
 
-<th class="p-4">
-ساعت خروج
+<th class="p-3">
+ورود
 </th>
 
 
-<th class="p-4">
+<th class="p-3">
+خروج
+</th>
+
+
+<th class="p-3">
 کارکرد
 </th>
 
 
-<th class="p-4">
+<th class="p-3">
 تاخیر
 </th>
 
 
-<th class="p-4">
+<th class="p-3">
 اضافه کاری
 </th>
 
 
-<th class="p-4">
+<th class="p-3">
 عملیات
 </th>
 
@@ -273,13 +350,15 @@ class="rounded-lg bg-blue-600 px-5 py-2 text-white hover:bg-blue-700"
 
 
 
+
+
 <tbody>
 
 
 
 <tr
 
-v-for="employee in props.employees"
+v-for="employee in employees"
 
 :key="employee.id"
 
@@ -288,22 +367,21 @@ class="border-b hover:bg-gray-50"
 >
 
 
-<td class="p-4">
+
+<td class="p-3">
 
 
 <div class="font-semibold">
 
-{{ employee.first_name }}
-
-{{ employee.last_name }}
+{{employee.first_name}}
+{{employee.last_name}}
 
 </div>
 
 
 <div class="text-sm text-gray-500">
 
-کد:
-{{ employee.employee_code }}
+{{employee.employee_code}}
 
 </div>
 
@@ -314,10 +392,40 @@ class="border-b hover:bg-gray-50"
 
 
 
-<td class="p-4">
 
 
-{{ getAttendance(employee)?.check_in ?? '-' }}
+<td class="p-3">
+
+
+<div v-if="employee.shift">
+
+
+<div class="font-semibold">
+
+{{employee.shift.name}}
+
+</div>
+
+
+<div class="text-sm text-gray-500">
+
+{{employee.shift.start_time}}
+
+تا
+
+{{employee.shift.end_time}}
+
+</div>
+
+
+</div>
+
+
+<span v-else>
+
+بدون شیفت
+
+</span>
 
 
 </td>
@@ -326,11 +434,13 @@ class="border-b hover:bg-gray-50"
 
 
 
-<td class="p-4">
 
 
-{{ getAttendance(employee)?.check_out ?? '-' }}
 
+
+<td class="p-3">
+
+{{formatTime(getAttendance(employee)?.check_in ?? null)}}
 
 </td>
 
@@ -338,14 +448,24 @@ class="border-b hover:bg-gray-50"
 
 
 
-<td class="p-4">
+<td class="p-3">
+
+{{formatTime(getAttendance(employee)?.check_out ?? null)}}
+
+</td>
 
 
-{{ formatMinutes(
 
+
+
+
+
+<td class="p-3">
+
+
+{{formatMinutes(
 getAttendance(employee)?.worked_minutes ?? 0
-
-) }}
+)}}
 
 
 </td>
@@ -354,14 +474,14 @@ getAttendance(employee)?.worked_minutes ?? 0
 
 
 
-<td class="p-4 text-red-600">
 
 
-{{ formatMinutes(
+<td class="p-3 text-red-600">
 
+
+{{formatMinutes(
 getAttendance(employee)?.late_minutes ?? 0
-
-) }}
+)}}
 
 
 </td>
@@ -370,14 +490,14 @@ getAttendance(employee)?.late_minutes ?? 0
 
 
 
-<td class="p-4 text-green-600">
 
 
-{{ formatMinutes(
+<td class="p-3 text-green-600">
 
+
+{{formatMinutes(
 getAttendance(employee)?.overtime_minutes ?? 0
-
-) }}
+)}}
 
 
 </td>
@@ -386,7 +506,12 @@ getAttendance(employee)?.overtime_minutes ?? 0
 
 
 
-<td class="p-4 space-x-2">
+
+
+<td class="p-3 space-x-2">
+
+
+
 
 
 
@@ -396,13 +521,15 @@ v-if="!getAttendance(employee)?.check_in"
 
 @click="checkIn(employee.id)"
 
-class="rounded-lg bg-green-600 px-4 py-2 text-white"
+class="rounded bg-green-600 px-3 py-2 text-white"
 
 >
 
-🟢 ورود
+ورود
 
 </button>
+
+
 
 
 
@@ -414,13 +541,16 @@ v-else-if="!getAttendance(employee)?.check_out"
 
 @click="checkOut(employee.id)"
 
-class="rounded-lg bg-red-600 px-4 py-2 text-white"
+class="rounded bg-red-600 px-3 py-2 text-white"
 
 >
 
-🔴 خروج
+خروج
 
 </button>
+
+
+
 
 
 
@@ -431,14 +561,11 @@ class="rounded-lg bg-red-600 px-4 py-2 text-white"
 v-if="getAttendance(employee)"
 
 :href="route(
-
 'attendances.edit',
-
-getAttendance(employee)?.id
-
+getAttendance(employee)!.id
 )"
 
-class="rounded-lg bg-yellow-500 px-4 py-2 text-white"
+class="rounded bg-yellow-500 px-3 py-2 text-white"
 
 >
 
@@ -450,27 +577,11 @@ class="rounded-lg bg-yellow-500 px-4 py-2 text-white"
 
 
 
-<span
-
-v-if="
-
-getAttendance(employee)?.check_in &&
-
-getAttendance(employee)?.check_out
-
-"
-
-class="text-gray-500"
-
->
-
-تکمیل شده
-
-</span>
-
 
 
 </td>
+
+
 
 
 
@@ -478,8 +589,8 @@ class="text-gray-500"
 
 
 
-
 </tbody>
+
 
 
 
@@ -491,16 +602,19 @@ class="text-gray-500"
 
 
 
+
+
 </div>
 
 
 
 </div>
+
+
 
 
 
 </AuthenticatedLayout>
-
 
 
 </template>

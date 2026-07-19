@@ -5,15 +5,15 @@ import { Head, Link, router } from '@inertiajs/vue3';
 
 
 
-interface Shift {
+interface Holiday {
 
     id:number;
 
-    name:string;
+    title:string;
 
-    start_time:string;
+    holiday_date:string;
 
-    end_time:string;
+    type:string;
 
     description:string|null;
 
@@ -35,9 +35,9 @@ interface PaginationLink {
 
 
 
-interface ShiftsData {
+interface HolidaysData {
 
-    data:Shift[];
+    data:Holiday[];
 
     links:PaginationLink[];
 
@@ -47,9 +47,10 @@ interface ShiftsData {
 
 const props = defineProps<{
 
-    shifts:ShiftsData;
+    holidays:HolidaysData;
 
 }>();
+
 
 
 
@@ -59,8 +60,9 @@ const props = defineProps<{
 function destroy(id:number)
 {
 
+
     if(
-        !confirm('آیا از حذف این شیفت مطمئن هستید؟')
+        !confirm('آیا از حذف این تعطیلی مطمئن هستید؟')
     ){
 
         return;
@@ -69,18 +71,56 @@ function destroy(id:number)
 
 
 
+
     router.delete(
 
         route(
-            'shifts.destroy',
+            'holidays.destroy',
             id
         ),
 
         {
-            preserveScroll:true,
+
+            preserveScroll:true
+
         }
 
     );
+
+
+}
+
+
+
+
+
+
+
+function typeName(type:string)
+{
+
+    switch(type){
+
+        case 'official':
+
+            return 'رسمی';
+
+
+        case 'weekly':
+
+            return 'هفتگی';
+
+
+        case 'company':
+
+            return 'سازمانی';
+
+
+        default:
+
+            return '-';
+
+    }
 
 }
 
@@ -95,8 +135,7 @@ function destroy(id:number)
 <template>
 
 
-<Head title="مدیریت شیفت‌ها"/>
-
+<Head title="مدیریت تعطیلات"/>
 
 
 
@@ -110,12 +149,13 @@ function destroy(id:number)
 
 <h2 class="text-xl font-semibold text-gray-800">
 
-مدیریت شیفت‌ها
+مدیریت تعطیلات
 
 </h2>
 
 
 </template>
+
 
 
 
@@ -137,9 +177,10 @@ function destroy(id:number)
 <div class="flex items-center justify-between border-b p-6">
 
 
+
 <h3 class="text-lg font-semibold">
 
-لیست شیفت‌های کاری
+لیست تعطیلات
 
 </h3>
 
@@ -147,21 +188,25 @@ function destroy(id:number)
 
 
 
+
 <Link
 
-:href="route('shifts.create')"
+:href="route('holidays.create')"
 
-class="rounded-lg bg-blue-600 px-5 py-2 text-white"
+class="rounded-lg bg-blue-600 px-5 py-2 text-white hover:bg-blue-700"
 
 >
 
-➕ شیفت جدید
+➕ تعطیلی جدید
 
 </Link>
 
 
 
 </div>
+
+
+
 
 
 
@@ -180,26 +225,26 @@ class="rounded-lg bg-blue-600 px-5 py-2 text-white"
 <thead>
 
 
-<tr class="border-b bg-gray-50">
+<tr class="border-b bg-gray-50 text-sm text-gray-600">
 
 
 <th class="p-4">
 
-نام
+عنوان
 
 </th>
 
 
 <th class="p-4">
 
-شروع
+تاریخ
 
 </th>
 
 
 <th class="p-4">
 
-پایان
+نوع
 
 </th>
 
@@ -229,15 +274,16 @@ class="rounded-lg bg-blue-600 px-5 py-2 text-white"
 
 
 
+
 <tbody>
 
 
 
 <tr
 
-v-for="shift in shifts.data"
+v-for="holiday in holidays.data"
 
-:key="shift.id"
+:key="holiday.id"
 
 class="border-b hover:bg-gray-50"
 
@@ -245,27 +291,10 @@ class="border-b hover:bg-gray-50"
 
 
 
+
 <td class="p-4 font-semibold">
 
-{{ shift.name }}
-
-</td>
-
-
-
-
-<td class="p-4">
-
-{{ shift.start_time }}
-
-</td>
-
-
-
-
-<td class="p-4">
-
-{{ shift.end_time }}
+{{ holiday.title }}
 
 </td>
 
@@ -274,11 +303,33 @@ class="border-b hover:bg-gray-50"
 
 
 <td class="p-4">
+
+{{ holiday.holiday_date }}
+
+</td>
+
+
+
+
+
+<td class="p-4">
+
+{{ typeName(holiday.type) }}
+
+</td>
+
+
+
+
+
+
+<td class="p-4">
+
 
 
 <span
 
-v-if="shift.is_active"
+v-if="holiday.is_active"
 
 class="rounded bg-green-100 px-3 py-1 text-green-700"
 
@@ -287,6 +338,7 @@ class="rounded bg-green-100 px-3 py-1 text-green-700"
 فعال
 
 </span>
+
 
 
 
@@ -310,13 +362,17 @@ class="rounded bg-red-100 px-3 py-1 text-red-700"
 
 
 
+
+
 <td class="p-4 space-x-2">
+
+
 
 
 
 <Link
 
-:href="route('shifts.edit',shift.id)"
+:href="route('holidays.edit',holiday.id)"
 
 class="rounded bg-yellow-500 px-3 py-2 text-white"
 
@@ -330,9 +386,10 @@ class="rounded bg-yellow-500 px-3 py-2 text-white"
 
 
 
+
 <button
 
-@click="destroy(shift.id)"
+@click="destroy(holiday.id)"
 
 class="rounded bg-red-600 px-3 py-2 text-white"
 
@@ -345,7 +402,11 @@ class="rounded bg-red-600 px-3 py-2 text-white"
 
 
 
+
+
 </td>
+
+
 
 
 
@@ -356,13 +417,17 @@ class="rounded bg-red-600 px-3 py-2 text-white"
 
 
 
+
+
 </tbody>
 
 
 
 
 
+
 </table>
+
 
 
 
@@ -376,12 +441,14 @@ class="rounded bg-red-600 px-3 py-2 text-white"
 
 
 
+
+
 <div class="flex justify-center gap-2 border-t p-4">
 
 
 <Link
 
-v-for="link in shifts.links"
+v-for="link in holidays.links"
 
 :key="link.label"
 
@@ -402,21 +469,20 @@ class="rounded px-3 py-2"
 ></Link>
 
 
-</div>
-
-
-
-
-
-
 
 </div>
 
 
 
 
+
+
 </div>
 
+
+
+
+</div>
 
 
 

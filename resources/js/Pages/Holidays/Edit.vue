@@ -5,15 +5,16 @@ import { Head, useForm } from '@inertiajs/vue3';
 
 
 
-interface Shift {
+
+interface Holiday {
 
     id:number;
 
-    name:string;
+    title:string;
 
-    start_time:string;
+    holiday_date:string;
 
-    end_time:string;
+    type:string;
 
     description:string|null;
 
@@ -24,9 +25,10 @@ interface Shift {
 
 
 
+
 const props = defineProps<{
 
-    shift:Shift;
+    holiday:Holiday;
 
 }>();
 
@@ -37,21 +39,24 @@ const props = defineProps<{
 
 const form = useForm({
 
-    name:props.shift.name,
 
-    start_time:props.shift.start_time 
-        ? props.shift.start_time.substring(0,5)
-        : '',
+    title:props.holiday.title,
 
-    end_time:props.shift.end_time 
-        ? props.shift.end_time.substring(0,5)
-        : '',
 
-    description:props.shift.description ?? '',
+    holiday_date:props.holiday.holiday_date,
 
-    is_active:props.shift.is_active,
+
+    type:props.holiday.type,
+
+
+    description:props.holiday.description ?? '',
+
+
+    is_active:props.holiday.is_active,
+
 
 });
+
 
 
 
@@ -62,23 +67,30 @@ const form = useForm({
 function submit()
 {
 
+
     form.put(
 
+
         route(
-            'shifts.update',
-            props.shift.id
+
+            'holidays.update',
+
+            props.holiday.id
+
         ),
+
 
         {
 
-            preserveScroll:true,
+            preserveScroll:true
 
         }
 
+
     );
 
-}
 
+}
 
 
 
@@ -92,7 +104,8 @@ function submit()
 <template>
 
 
-<Head title="ویرایش شیفت"/>
+<Head title="ویرایش تعطیلی"/>
+
 
 
 
@@ -108,7 +121,7 @@ function submit()
 
 <h2 class="text-xl font-semibold text-gray-800">
 
-ویرایش شیفت کاری
+ویرایش تعطیلی
 
 </h2>
 
@@ -147,13 +160,12 @@ class="space-y-6"
 
 
 
-
 <div>
 
 
 <label class="mb-2 block">
 
-نام شیفت
+عنوان تعطیلی
 
 </label>
 
@@ -161,7 +173,7 @@ class="space-y-6"
 
 <input
 
-v-model="form.name"
+v-model="form.title"
 
 class="w-full rounded border-gray-300"
 
@@ -169,15 +181,17 @@ class="w-full rounded border-gray-300"
 
 
 
+
+
 <div
 
-v-if="form.errors.name"
+v-if="form.errors.title"
 
 class="mt-1 text-sm text-red-600"
 
 >
 
-{{ form.errors.name }}
+{{ form.errors.title }}
 
 </div>
 
@@ -199,12 +213,13 @@ class="mt-1 text-sm text-red-600"
 
 
 
+
 <div>
 
 
 <label class="mb-2 block">
 
-ساعت شروع
+تاریخ تعطیلی
 
 </label>
 
@@ -212,9 +227,9 @@ class="mt-1 text-sm text-red-600"
 
 <input
 
-v-model="form.start_time"
+v-model="form.holiday_date"
 
-type="time"
+type="date"
 
 class="w-full rounded border-gray-300"
 
@@ -236,25 +251,52 @@ class="w-full rounded border-gray-300"
 
 <label class="mb-2 block">
 
-ساعت پایان
+نوع تعطیلی
 
 </label>
 
 
 
-<input
+<select
 
-v-model="form.end_time"
-
-type="time"
+v-model="form.type"
 
 class="w-full rounded border-gray-300"
 
-/>
+>
+
+
+
+<option value="official">
+
+رسمی
+
+</option>
+
+
+
+<option value="weekly">
+
+هفتگی
+
+</option>
+
+
+
+<option value="company">
+
+سازمانی
+
+</option>
+
+
+
+</select>
 
 
 
 </div>
+
 
 
 
@@ -302,7 +344,6 @@ class="w-full rounded border-gray-300"
 
 
 
-
 <div>
 
 
@@ -318,11 +359,13 @@ v-model="form.is_active"
 />
 
 
+
 <span>
 
 فعال باشد
 
 </span>
+
 
 
 </label>
@@ -349,7 +392,7 @@ type="submit"
 
 :disabled="form.processing"
 
-class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
+class="rounded-lg bg-blue-600 px-6 py-3 text-white"
 
 >
 
@@ -366,6 +409,7 @@ class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
 ذخیره تغییرات
 
 </span>
+
 
 
 </button>
@@ -389,7 +433,6 @@ class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
 
 
 
-
 </div>
 
 
@@ -407,6 +450,7 @@ class="rounded-lg bg-blue-600 px-6 py-3 text-white hover:bg-blue-700"
 
 
 </AuthenticatedLayout>
+
 
 
 

@@ -55,6 +55,12 @@ class RolePermissionSeeder extends Seeder
             'leave.manage',
 
 
+            // تعطیلات
+            'holidays.view',
+            'holidays.create',
+            'holidays.edit',
+            'holidays.delete',
+
             // گزارشات
             'reports.view',
 
@@ -127,6 +133,11 @@ class RolePermissionSeeder extends Seeder
 
             'leave.view',
             'leave.manage',
+
+            'holidays.view',
+            'holidays.create',
+            'holidays.edit',
+            'holidays.delete',
 
             'reports.view',
 

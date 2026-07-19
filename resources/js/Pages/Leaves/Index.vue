@@ -2,9 +2,10 @@
 
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import { Head, Link, router } from '@inertiajs/vue3';
-import { ref, watch } from 'vue';
 
-interface Employee{
+
+
+interface Employee {
 
     id:number;
 
@@ -16,35 +17,35 @@ interface Employee{
 
 }
 
-interface User{
 
-    id:number;
 
-    name:string;
+interface Leave {
 
-}
-
-interface Leave{
 
     id:number;
 
     type:string;
 
-    from_date:string;
+    start_date:string;
 
-    to_date:string;
+    end_date:string;
 
     days:number;
+
+    reason:string|null;
 
     status:string;
 
     employee:Employee;
 
-    approver?:User;
 
 }
 
-interface PaginationLink{
+
+
+
+
+interface PaginationLink {
 
     url:string|null;
 
@@ -54,7 +55,11 @@ interface PaginationLink{
 
 }
 
-interface LeavesData{
+
+
+
+
+interface LeavesData {
 
     data:Leave[];
 
@@ -62,131 +67,202 @@ interface LeavesData{
 
 }
 
+
+
+
+
 const props = defineProps<{
 
     leaves:LeavesData;
 
-    filters:{
-
-        status:string|null;
-
-    }
-
 }>();
 
-const status = ref(
-    props.filters.status ?? ''
-);
 
-watch(status,(value)=>{
 
-    router.get(
 
-        route('leaves.index'),
 
-        {
 
-            status:value
 
-        },
+function approve(id:number)
+{
 
-        {
 
-            preserveState:true,
+    if(!confirm('تایید این مرخصی انجام شود؟'))
+        return;
 
-            replace:true
 
-        }
+
+    router.patch(
+
+        route(
+
+            'leaves.approve',
+
+            id
+
+        )
 
     );
 
-});
-
-function approve(id:number){
-
-    if(confirm('مرخصی تایید شود؟')){
-
-        router.patch(
-
-            route('leaves.approve',id)
-
-        );
-
-    }
 
 }
 
-function reject(id:number){
 
-    if(confirm('مرخصی رد شود؟')){
 
-        router.patch(
 
-            route('leaves.reject',id)
 
-        );
 
-    }
+
+function reject(id:number)
+{
+
+
+    if(!confirm('رد این مرخصی انجام شود؟'))
+
+        return;
+
+
+
+    router.patch(
+
+        route(
+
+            'leaves.reject',
+
+            id
+
+        )
+
+    );
+
 
 }
+
+
+
+
+
+
+
+function typeText(type:string)
+{
+
+
+    const types:any = {
+
+
+        annual:'استحقاقی',
+
+        sick:'استعلاجی',
+
+        hourly:'ساعتی',
+
+        unpaid:'بدون حقوق'
+
+
+    };
+
+
+
+    return types[type] ?? type;
+
+
+}
+
+
+
+
+
+
+
+function statusText(status:string)
+{
+
+
+    const statuses:any = {
+
+
+        pending:'در انتظار',
+
+        approved:'تایید شده',
+
+        rejected:'رد شده'
+
+
+    };
+
+
+
+    return statuses[status] ?? status;
+
+
+}
+
+
 
 </script>
 
+
+
+
+
+
+
 <template>
 
-<Head title="مدیریت مرخصی ها"/>
+
+<Head title="مدیریت مرخصی"/>
+
+
+
+
 
 <AuthenticatedLayout>
 
+
+
+
 <template #header>
 
-<h2 class="text-xl font-semibold">
 
-مدیریت مرخصی ها
+<h2 class="text-xl font-semibold text-gray-800">
+
+مدیریت مرخصی‌ها
 
 </h2>
 
+
 </template>
+
+
+
+
+
+
 
 <div class="p-6">
 
+
+
 <div class="rounded-lg bg-white shadow">
 
-<div class="flex items-center justify-between border-b p-6">
 
-<select
 
-v-model="status"
 
-class="rounded-lg border px-4 py-2"
 
->
 
-<option value="">
+<div class="flex justify-between border-b p-6">
 
-همه وضعیت ها
 
-</option>
 
-<option value="pending">
+<h3 class="text-lg font-semibold">
 
-در انتظار
+لیست درخواست‌ها
 
-</option>
+</h3>
 
-<option value="approved">
 
-تایید شده
 
-</option>
-
-<option value="rejected">
-
-رد شده
-
-</option>
-
-</select>
 
 <Link
 
@@ -196,19 +272,35 @@ class="rounded-lg bg-blue-600 px-5 py-2 text-white"
 
 >
 
-ثبت مرخصی
+➕ درخواست مرخصی
 
 </Link>
 
+
+
 </div>
 
-<div class="overflow-x-auto">
+
+
+
+
+
+
+
+
+<div class="overflow-x-auto p-6">
+
+
 
 <table class="w-full text-right">
 
+
+
 <thead>
 
-<tr class="border-b bg-gray-100">
+
+<tr class="border-b bg-gray-50">
+
 
 <th class="p-4">
 
@@ -216,17 +308,27 @@ class="rounded-lg bg-blue-600 px-5 py-2 text-white"
 
 </th>
 
+
 <th class="p-4">
 
 نوع
 
 </th>
 
+
 <th class="p-4">
 
-بازه
+از تاریخ
 
 </th>
+
+
+<th class="p-4">
+
+تا تاریخ
+
+</th>
+
 
 <th class="p-4">
 
@@ -234,17 +336,13 @@ class="rounded-lg bg-blue-600 px-5 py-2 text-white"
 
 </th>
 
+
 <th class="p-4">
 
 وضعیت
 
 </th>
 
-<th class="p-4">
-
-تایید کننده
-
-</th>
 
 <th class="p-4">
 
@@ -252,11 +350,21 @@ class="rounded-lg bg-blue-600 px-5 py-2 text-white"
 
 </th>
 
+
 </tr>
+
 
 </thead>
 
+
+
+
+
+
+
 <tbody>
+
+
 
 <tr
 
@@ -268,83 +376,139 @@ class="border-b"
 
 >
 
+
+
 <td class="p-4">
 
-{{ leave.employee.first_name }}
 
-{{ leave.employee.last_name }}
+{{leave.employee.first_name}}
+
+{{leave.employee.last_name}}
+
+
+
+<div class="text-sm text-gray-500">
+
+{{leave.employee.employee_code}}
+
+</div>
+
 
 </td>
 
+
+
+
+
+
+
 <td class="p-4">
 
-{{ leave.type }}
+{{typeText(leave.type)}}
 
 </td>
 
+
+
+
+
+
+
 <td class="p-4">
 
-{{ leave.from_date }}
-
-<br>
-
-{{ leave.to_date }}
+{{leave.start_date}}
 
 </td>
 
+
+
+
+
+
+
 <td class="p-4">
 
-{{ leave.days }}
+{{leave.end_date}}
 
 </td>
 
+
+
+
+
+
+
 <td class="p-4">
+
+{{leave.days}}
+
+</td>
+
+
+
+
+
+
+
+<td class="p-4">
+
 
 <span
 
-v-if="leave.status==='pending'"
-
-class="rounded bg-yellow-100 px-3 py-1 text-yellow-700"
-
->
-
-در انتظار
-
-</span>
-
-<span
-
-v-else-if="leave.status==='approved'"
+v-if="leave.status==='approved'"
 
 class="rounded bg-green-100 px-3 py-1 text-green-700"
 
 >
 
-تایید شده
+{{statusText(leave.status)}}
 
 </span>
 
+
+
+
 <span
 
-v-else
+v-else-if="leave.status==='rejected'"
 
 class="rounded bg-red-100 px-3 py-1 text-red-700"
 
 >
 
-رد شده
+{{statusText(leave.status)}}
 
 </span>
 
+
+
+
+<span
+
+v-else
+
+class="rounded bg-yellow-100 px-3 py-1 text-yellow-700"
+
+>
+
+{{statusText(leave.status)}}
+
+</span>
+
+
+
 </td>
 
-<td class="p-4">
 
-{{ leave.approver?.name ?? '-' }}
 
-</td>
+
+
+
+
 
 <td class="p-4 space-x-2">
+
+
 
 <button
 
@@ -352,7 +516,7 @@ v-if="leave.status==='pending'"
 
 @click="approve(leave.id)"
 
-class="rounded bg-green-600 px-3 py-2 text-white"
+class="rounded bg-green-600 px-3 py-1 text-white"
 
 >
 
@@ -360,13 +524,17 @@ class="rounded bg-green-600 px-3 py-2 text-white"
 
 </button>
 
+
+
+
+
 <button
 
 v-if="leave.status==='pending'"
 
 @click="reject(leave.id)"
 
-class="rounded bg-red-600 px-3 py-2 text-white"
+class="rounded bg-red-600 px-3 py-1 text-white"
 
 >
 
@@ -374,17 +542,38 @@ class="rounded bg-red-600 px-3 py-2 text-white"
 
 </button>
 
+
+
+
 </td>
+
+
+
+
 
 </tr>
 
+
+
+
+
 </tbody>
+
+
 
 </table>
 
+
+
 </div>
 
-<div class="flex justify-center gap-2 p-5">
+
+
+
+
+
+<div class="flex justify-center gap-2 border-t p-4">
+
 
 <Link
 
@@ -408,14 +597,32 @@ class="rounded px-3 py-2"
 
 >
 
+
+
 </Link>
 
-</div>
+
 
 </div>
 
+
+
+
+
+
 </div>
+
+
+</div>
+
+
+
+
 
 </AuthenticatedLayout>
+
+
+
+
 
 </template>

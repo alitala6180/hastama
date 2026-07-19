@@ -2,9 +2,15 @@
 
 namespace App\Http\Controllers;
 
+
 use App\Models\Shift;
-use Illuminate\Http\Request;
+
+use App\Http\Requests\StoreShiftRequest;
+use App\Http\Requests\UpdateShiftRequest;
+
 use Inertia\Inertia;
+
+
 
 class ShiftController extends Controller
 {
@@ -13,8 +19,16 @@ class ShiftController extends Controller
     public function index()
     {
 
-        $shifts = Shift::latest()
-            ->paginate(10);
+
+        $shifts = Shift::query()
+
+            ->latest()
+
+            ->paginate(10)
+
+            ->withQueryString();
+
+
 
 
         return Inertia::render(
@@ -26,7 +40,13 @@ class ShiftController extends Controller
             ]
         );
 
+
     }
+
+
+
+
+
 
 
 
@@ -34,9 +54,11 @@ class ShiftController extends Controller
     public function create()
     {
 
+
         return Inertia::render(
             'Shifts/Create'
         );
+
 
     }
 
@@ -44,32 +66,26 @@ class ShiftController extends Controller
 
 
 
-    public function store(Request $request)
+
+
+
+
+    public function store(StoreShiftRequest $request)
     {
 
-        $validated = $request->validate([
 
-
-            'name'=>'required|string|max:255',
-
-
-            'start_time'=>'required',
-
-
-            'end_time'=>'required',
-
-
-            'description'=>'nullable|string',
-
-
-            'is_active'=>'boolean',
-
-
-        ]);
+        abort_unless(
+            $request->user()->can('shifts.create'),
+            403
+        );
 
 
 
-        Shift::create($validated);
+        Shift::create(
+
+            $request->validated()
+
+        );
 
 
 
@@ -82,7 +98,39 @@ class ShiftController extends Controller
                 'شیفت با موفقیت ثبت شد'
             );
 
+
     }
+
+
+
+
+
+
+
+
+
+    public function show(Shift $shift)
+    {
+
+
+        $shift->loadCount('employees');
+
+
+
+        return Inertia::render(
+            'Shifts/Show',
+            [
+
+                'shift'=>$shift
+
+            ]
+        );
+
+
+    }
+
+
+
 
 
 
@@ -94,16 +142,14 @@ class ShiftController extends Controller
 
 
         return Inertia::render(
-
             'Shifts/Edit',
-
             [
 
                 'shift'=>$shift
 
             ]
-
         );
+
 
     }
 
@@ -112,33 +158,28 @@ class ShiftController extends Controller
 
 
 
-    public function update(Request $request, Shift $shift)
+
+
+
+    public function update(
+        UpdateShiftRequest $request,
+        Shift $shift
+    )
     {
 
 
-        $validated = $request->validate([
-
-
-            'name'=>'required|string|max:255',
-
-
-            'start_time'=>'required',
-
-
-            'end_time'=>'required',
-
-
-            'description'=>'nullable|string',
-
-
-            'is_active'=>'boolean',
-
-
-        ]);
+        abort_unless(
+            $request->user()->can('shifts.edit'),
+            403
+        );
 
 
 
-        $shift->update($validated);
+        $shift->update(
+
+            $request->validated()
+
+        );
 
 
 
@@ -151,7 +192,11 @@ class ShiftController extends Controller
                 'شیفت بروزرسانی شد'
             );
 
+
     }
+
+
+
 
 
 
@@ -161,7 +206,37 @@ class ShiftController extends Controller
     public function destroy(Shift $shift)
     {
 
+
+        abort_unless(
+            request()->user()->can('shifts.delete'),
+            403
+        );
+
+
+
+
+
+        if(
+            $shift->employees()->exists()
+        ){
+
+            return back()
+
+                ->with(
+                    'error',
+                    'این شیفت به پرسنل اختصاص داده شده و قابل حذف نیست'
+                );
+
+        }
+
+
+
+
+
+
         $shift->delete();
+
+
 
 
 
@@ -174,19 +249,9 @@ class ShiftController extends Controller
                 'شیفت حذف شد'
             );
 
-    }
-
-
-
-
-
-    public function show(Shift $shift)
-    {
-
-        return redirect()
-
-            ->route('shifts.edit',$shift);
 
     }
+
+
 
 }

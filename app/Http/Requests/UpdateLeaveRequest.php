@@ -5,7 +5,7 @@ namespace App\Http\Requests;
 use Illuminate\Foundation\Http\FormRequest;
 
 
-class StoreLeaveRequest extends FormRequest
+class UpdateLeaveRequest extends FormRequest
 {
 
 
@@ -23,17 +23,6 @@ class StoreLeaveRequest extends FormRequest
         return [
 
 
-            'employee_id'=>[
-
-                'required',
-
-                'exists:employees,id',
-
-            ],
-
-
-
-
             'type'=>[
 
                 'required',
@@ -41,7 +30,6 @@ class StoreLeaveRequest extends FormRequest
                 'in:annual,sick,hourly,unpaid',
 
             ],
-
 
 
 
@@ -70,7 +58,6 @@ class StoreLeaveRequest extends FormRequest
 
 
 
-
             'days'=>[
 
                 'required',
@@ -84,7 +71,6 @@ class StoreLeaveRequest extends FormRequest
 
 
 
-
             'reason'=>[
 
                 'nullable',
@@ -94,9 +80,9 @@ class StoreLeaveRequest extends FormRequest
             ],
 
 
-
         ];
 
     }
+
 
 }

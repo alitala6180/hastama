@@ -4,48 +4,112 @@ use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+
 return new class extends Migration
 {
+
     public function up(): void
     {
+
         Schema::create('leaves', function (Blueprint $table) {
+
 
             $table->id();
 
+
+
             $table->foreignId('employee_id')
+
                 ->constrained()
+
                 ->cascadeOnDelete();
 
-            $table->enum('type', [
+
+
+
+            $table->enum('type',[
+
                 'annual',
+
                 'sick',
-                'without_salary',
-                'mission',
+
+                'hourly',
+
+                'unpaid'
+
             ]);
 
-            $table->date('from_date');
 
-            $table->date('to_date');
 
-            $table->unsignedInteger('days');
 
-            $table->text('reason')->nullable();
+            $table->date('start_date');
 
-            $table->enum('status', [
+            $table->date('end_date');
+
+
+
+            $table->decimal(
+
+                'days',
+
+                5,
+
+                2
+
+            );
+
+
+
+            $table->text('reason')
+
+                ->nullable();
+
+
+
+
+            $table->enum('status',[
+
                 'pending',
-                'approved',
-                'rejected',
-            ])->default('pending');
 
-            $table->text('manager_note')->nullable();
+                'approved',
+
+                'rejected'
+
+            ])
+
+            ->default('pending');
+
+
+
+
+
+            $table->foreignId('approved_by')
+
+                ->nullable()
+
+                ->constrained('users')
+
+                ->nullOnDelete();
+
+
+
 
             $table->timestamps();
 
+
         });
+
     }
+
+
+
+
 
     public function down(): void
     {
+
         Schema::dropIfExists('leaves');
+
     }
+
 };

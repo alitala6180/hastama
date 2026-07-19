@@ -11,6 +11,7 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\RoleController;
 use App\Http\Controllers\AttendanceReportController;
 use App\Http\Controllers\ShiftController;
+use App\Http\Controllers\HolidayController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -98,7 +99,12 @@ Route::middleware('auth')->group(function () {
     Route::resource(
         'shifts',
         ShiftController::class
-    );    
+    );
+
+    Route::resource(
+        'holidays',
+        HolidayController::class
+    );
 
     /*
     |--------------------------------------------------------------------------

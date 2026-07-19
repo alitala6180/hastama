@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use App\Models\Holiday;
 
 
 class Attendance extends Model
@@ -58,6 +59,17 @@ class Attendance extends Model
 
         return $this->belongsTo(
             Employee::class
+        );
+
+    }
+
+    public function holiday()
+    {
+
+        return $this->belongsTo(
+            Holiday::class,
+            'work_date',
+            'holiday_date'
         );
 
     }
