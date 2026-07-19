@@ -6,6 +6,26 @@ import { ref } from 'vue';
 
 
 
+interface Department {
+
+    id:number;
+
+    name:string;
+
+}
+
+
+
+interface Shift {
+
+    id:number;
+
+    name:string;
+
+}
+
+
+
 interface Employee {
 
     id:number;
@@ -16,11 +36,16 @@ interface Employee {
 
     employee_code:string;
 
+    department?:Department;
+
+    shift?:Shift;
+
 }
 
 
 
 interface Attendance {
+
 
     id:number;
 
@@ -38,19 +63,34 @@ interface Attendance {
 
     employee:Employee;
 
-}
-
-
-
-interface PaginationLink {
-
-    url:string|null;
-
-    label:string;
-
-    active:boolean;
 
 }
+
+
+
+interface EmployeeSummary {
+
+
+    employee:Employee;
+
+
+    attendance_days:number;
+
+
+    absent_days:number;
+
+
+    worked_minutes:number;
+
+
+    late_minutes:number;
+
+
+    overtime_minutes:number;
+
+
+}
+
 
 
 
@@ -61,12 +101,22 @@ interface Props {
 
         data:Attendance[];
 
-        links:PaginationLink[];
+        links:any[];
 
     };
 
 
     employees:Employee[];
+
+
+    departments:Department[];
+
+
+    shifts:Shift[];
+
+
+    employeeSummaries:EmployeeSummary[];
+
 
 
     filters:{
@@ -77,7 +127,12 @@ interface Props {
 
         employee_id:number|null;
 
+        department_id:number|null;
+
+        shift_id:number|null;
+
     };
+
 
 
     summary:{
@@ -88,7 +143,10 @@ interface Props {
 
         overtime_minutes:number;
 
+        days:number;
+
     };
+
 
 
 }
@@ -101,19 +159,17 @@ const props = defineProps<Props>();
 
 
 
-const from = ref(
-    props.filters.from
-);
+const from = ref(props.filters.from);
+
+const to = ref(props.filters.to);
+
+const employeeId = ref(props.filters.employee_id ?? '');
+
+const departmentId = ref(props.filters.department_id ?? '');
+
+const shiftId = ref(props.filters.shift_id ?? '');
 
 
-const to = ref(
-    props.filters.to
-);
-
-
-const employeeId = ref(
-    props.filters.employee_id ?? ''
-);
 
 
 
@@ -122,11 +178,10 @@ const employeeId = ref(
 function search()
 {
 
+
     router.get(
 
-        route(
-            'attendance.reports'
-        ),
+        route('attendance.reports'),
 
         {
 
@@ -134,7 +189,12 @@ function search()
 
             to:to.value,
 
-            employee_id:employeeId.value
+            employee_id:employeeId.value,
+
+            department_id:departmentId.value,
+
+            shift_id:shiftId.value,
+
 
         },
 
@@ -148,7 +208,10 @@ function search()
 
     );
 
+
 }
+
+
 
 
 
@@ -157,24 +220,22 @@ function search()
 function formatMinutes(minutes:number)
 {
 
+
     if(!minutes)
 
         return '0:00';
 
 
 
-    const hours = Math.floor(
-        minutes / 60
-    );
+    const hours = Math.floor(minutes / 60);
 
 
     const mins = minutes % 60;
 
 
 
-    return `${hours}:${mins
-        .toString()
-        .padStart(2,'0')}`;
+    return `${hours}:${mins.toString().padStart(2,'0')}`;
+
 
 }
 
@@ -192,7 +253,6 @@ function formatMinutes(minutes:number)
 <Head title="گزارش حضور و غیاب"/>
 
 
-
 <AuthenticatedLayout>
 
 
@@ -200,11 +260,12 @@ function formatMinutes(minutes:number)
 
 <h2 class="text-xl font-semibold text-gray-800">
 
-گزارش حضور و غیاب
+گزارش حرفه‌ای حضور و غیاب
 
 </h2>
 
 </template>
+
 
 
 
@@ -217,20 +278,16 @@ function formatMinutes(minutes:number)
 
 <!-- Filters -->
 
-
 <div class="rounded-lg bg-white p-6 shadow">
 
 
-<div class="grid grid-cols-1 gap-4 md:grid-cols-4">
+<div class="grid grid-cols-1 md:grid-cols-5 gap-4">
 
 
 
 <div>
 
-<label class="text-sm">
-از تاریخ
-</label>
-
+<label>از تاریخ</label>
 
 <input
 
@@ -238,9 +295,9 @@ v-model="from"
 
 type="date"
 
-class="mt-2 w-full rounded border"
+class="w-full rounded border mt-2"
 
->
+/>
 
 </div>
 
@@ -249,10 +306,7 @@ class="mt-2 w-full rounded border"
 
 <div>
 
-<label class="text-sm">
-تا تاریخ
-</label>
-
+<label>تا تاریخ</label>
 
 <input
 
@@ -260,9 +314,9 @@ v-model="to"
 
 type="date"
 
-class="mt-2 w-full rounded border"
+class="w-full rounded border mt-2"
 
->
+/>
 
 </div>
 
@@ -272,24 +326,19 @@ class="mt-2 w-full rounded border"
 
 <div>
 
-<label class="text-sm">
-پرسنل
-</label>
-
+<label>پرسنل</label>
 
 <select
 
 v-model="employeeId"
 
-class="mt-2 w-full rounded border"
+class="w-full rounded border mt-2"
 
 >
 
-
 <option value="">
-همه پرسنل
+همه
 </option>
-
 
 
 <option
@@ -306,9 +355,49 @@ v-for="employee in employees"
 
 {{employee.last_name}}
 
--
+</option>
 
-{{employee.employee_code}}
+
+</select>
+
+</div>
+
+
+
+
+
+
+
+<div>
+
+<label>واحد</label>
+
+
+<select
+
+v-model="departmentId"
+
+class="w-full rounded border mt-2"
+
+>
+
+
+<option value="">
+همه
+</option>
+
+
+<option
+
+v-for="item in departments"
+
+:key="item.id"
+
+:value="item.id"
+
+>
+
+{{item.name}}
 
 </option>
 
@@ -321,14 +410,59 @@ v-for="employee in employees"
 
 
 
-<div class="flex items-end">
+
+
+
+<div>
+
+<label>شیفت</label>
+
+
+<select
+
+v-model="shiftId"
+
+class="w-full rounded border mt-2"
+
+>
+
+
+<option value="">
+همه
+</option>
+
+
+<option
+
+v-for="item in shifts"
+
+:key="item.id"
+
+:value="item.id"
+
+>
+
+{{item.name}}
+
+</option>
+
+
+</select>
+
+
+</div>
+
+
+</div>
+
+
 
 
 <button
 
 @click="search"
 
-class="rounded bg-blue-600 px-5 py-2 text-white"
+class="mt-5 rounded bg-blue-600 px-6 py-2 text-white"
 
 >
 
@@ -336,107 +470,114 @@ class="rounded bg-blue-600 px-5 py-2 text-white"
 
 </button>
 
+<a
+
+:href="route('attendance.reports.export',{
+    from:from,
+    to:to,
+    employee_id:employeeId
+})"
+
+class="rounded bg-green-600 px-6 py-2 text-white"
+
+>
+
+📥 خروجی Excel
+
+</a>
+
 
 </div>
 
 
 
 
+
+
+
+
+<!-- Summary Cards -->
+
+
+<div class="grid md:grid-cols-4 gap-5">
+
+
+<div class="bg-white shadow rounded p-5">
+
+<p>روزهای حضور</p>
+
+<strong class="text-3xl">
+
+{{summary.days}}
+
+</strong>
+
 </div>
 
 
-</div>
 
+<div class="bg-white shadow rounded p-5">
 
+<p>کارکرد</p>
 
-
-
-
-
-<!-- Summary -->
-
-
-<div class="grid grid-cols-1 gap-5 md:grid-cols-3">
-
-
-
-<div class="rounded-lg bg-white p-5 shadow">
-
-<p class="text-gray-500">
-
-کارکرد
-
-</p>
-
-
-<p class="mt-2 text-3xl font-bold">
+<strong class="text-3xl">
 
 {{formatMinutes(summary.worked_minutes)}}
 
-</p>
-
+</strong>
 
 </div>
 
 
 
 
+<div class="bg-white shadow rounded p-5">
 
-<div class="rounded-lg bg-white p-5 shadow">
+<p>تاخیر</p>
 
-<p class="text-gray-500">
-
-تاخیر
-
-</p>
-
-
-<p class="mt-2 text-3xl font-bold text-red-600">
+<strong class="text-3xl text-red-600">
 
 {{formatMinutes(summary.late_minutes)}}
 
-</p>
-
+</strong>
 
 </div>
 
 
 
 
+<div class="bg-white shadow rounded p-5">
 
-<div class="rounded-lg bg-white p-5 shadow">
+<p>اضافه کاری</p>
 
-<p class="text-gray-500">
-
-اضافه کاری
-
-</p>
-
-
-<p class="mt-2 text-3xl font-bold text-green-600">
+<strong class="text-3xl text-green-600">
 
 {{formatMinutes(summary.overtime_minutes)}}
 
-</p>
+</strong>
+
+</div>
 
 
 </div>
 
 
 
-</div>
 
 
 
 
+<!-- Employee Summary -->
 
 
+<div class="bg-white rounded shadow overflow-x-auto">
 
 
-<!-- Table -->
+<h3 class="p-5 font-bold">
 
+خلاصه عملکرد پرسنل
 
-<div class="rounded-lg bg-white shadow overflow-hidden">
+</h3>
 
 
 <table class="w-full text-right">
@@ -446,48 +587,126 @@ class="rounded bg-blue-600 px-5 py-2 text-white"
 
 <tr class="border-b bg-gray-50">
 
+<th class="p-4">پرسنل</th>
 
-<th class="p-4">
-تاریخ
-</th>
+<th>حضور</th>
 
+<th>غیبت</th>
 
-<th class="p-4">
-پرسنل
-</th>
+<th>کارکرد</th>
 
+<th>تاخیر</th>
 
-<th class="p-4">
-ورود
-</th>
+<th>اضافه کاری</th>
 
+</tr>
 
-<th class="p-4">
-خروج
-</th>
+</thead>
 
 
-<th class="p-4">
-کارکرد
-</th>
+
+<tbody>
 
 
-<th class="p-4">
-تاخیر
-</th>
+<tr
+
+v-for="item in employeeSummaries"
+
+:key="item.employee.id"
+
+class="border-b"
+
+>
 
 
-<th class="p-4">
-اضافه کاری
-</th>
+<td class="p-4">
+
+{{item.employee.first_name}}
+
+{{item.employee.last_name}}
+
+</td>
+
+
+<td>
+
+{{item.attendance_days}}
+
+</td>
+
+
+<td class="text-red-600">
+
+{{item.absent_days}}
+
+</td>
+
+
+<td>
+
+{{formatMinutes(item.worked_minutes)}}
+
+</td>
+
+
+<td>
+
+{{formatMinutes(item.late_minutes)}}
+
+</td>
+
+
+<td>
+
+{{formatMinutes(item.overtime_minutes)}}
+
+</td>
 
 
 </tr>
 
 
+</tbody>
+
+
+</table>
+
+
+</div>
+
+
+
+
+
+
+
+
+<!-- Detail -->
+
+
+<div class="bg-white rounded shadow overflow-x-auto">
+
+
+<table class="w-full text-right">
+
+
+<thead>
+
+<tr class="border-b">
+
+<th class="p-4">تاریخ</th>
+
+<th>پرسنل</th>
+
+<th>ورود</th>
+
+<th>خروج</th>
+
+<th>کارکرد</th>
+
+</tr>
+
 </thead>
-
-
 
 
 
@@ -512,8 +731,7 @@ class="border-b"
 </td>
 
 
-
-<td class="p-4">
+<td>
 
 {{item.employee.first_name}}
 
@@ -522,54 +740,28 @@ class="border-b"
 </td>
 
 
-
-
-<td class="p-4">
+<td>
 
 {{item.check_in ?? '-'}}
 
 </td>
 
 
-
-
-<td class="p-4">
+<td>
 
 {{item.check_out ?? '-'}}
 
 </td>
 
 
-
-<td class="p-4">
+<td>
 
 {{formatMinutes(item.worked_minutes)}}
 
 </td>
 
 
-
-
-<td class="p-4 text-red-600">
-
-{{formatMinutes(item.late_minutes)}}
-
-</td>
-
-
-
-
-<td class="p-4 text-green-600">
-
-{{formatMinutes(item.overtime_minutes)}}
-
-</td>
-
-
-
-
 </tr>
-
 
 
 </tbody>
@@ -585,10 +777,6 @@ class="border-b"
 
 
 
-
-<!-- Pagination -->
-
-
 <div class="flex justify-center gap-2">
 
 
@@ -602,17 +790,9 @@ v-for="link in attendances.links"
 
 v-html="link.label"
 
-class="rounded px-3 py-2"
+class="px-3 py-2 rounded bg-gray-100"
 
-:class="{
-
-'bg-blue-600 text-white':link.active,
-
-'bg-gray-100':!link.active
-
-}"
-
-></Link>
+/>
 
 
 </div>
@@ -620,8 +800,8 @@ class="rounded px-3 py-2"
 
 
 
-</div>
 
+</div>
 
 
 </AuthenticatedLayout>

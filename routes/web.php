@@ -12,6 +12,7 @@ use App\Http\Controllers\RoleController;
 use App\Http\Controllers\AttendanceReportController;
 use App\Http\Controllers\ShiftController;
 use App\Http\Controllers\HolidayController;
+use App\Http\Controllers\AttendanceExportController;
 use Illuminate\Support\Facades\Route;
 
 
@@ -48,6 +49,26 @@ Route::middleware('auth')->group(function () {
     )
         ->middleware('permission:reports.view')
         ->name('attendance.reports');
+    
+    Route::get(
+        'attendance-reports/pdf',
+        [
+            AttendanceExportController::class,
+            'pdf'
+        ]
+    )
+    ->middleware('permission:reports.view')
+    ->name('attendance.reports.pdf');
+    
+    Route::get(
+        'attendance-reports/export',
+        [
+            AttendanceExportController::class,
+            'export'
+        ]
+    )
+    ->middleware('permission:reports.view')
+    ->name('attendance.reports.export');
 
     Route::patch(
         '/leaves/{leave}/approve',
