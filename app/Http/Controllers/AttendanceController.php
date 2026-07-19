@@ -71,10 +71,12 @@ class AttendanceController extends Controller
 
             'attendances'=>function($query) use ($date){
 
-                $query->whereDate(
-                    'work_date',
-                    $date
-                );
+                $query
+                    ->whereDate(
+                        'work_date',
+                        $date
+                    )
+                    ->latest();
 
             }
 
@@ -267,39 +269,27 @@ class AttendanceController extends Controller
     public function checkIn(Employee $employee)
     {
 
-
         abort_unless(
             request()->user()->can('attendance.manage'),
             403
         );
 
 
-
         $today = now()->toDateString();
-
-
 
 
 
         $attendance = Attendance::firstOrCreate([
 
-
             'employee_id'=>$employee->id,
 
-
             'work_date'=>$today,
-
 
         ]);
 
 
 
-
-
-
-
         if($attendance->check_in){
-
 
             return back()->with(
 
@@ -309,26 +299,38 @@ class AttendanceController extends Controller
 
             );
 
-
         }
 
 
 
+        $employee->load('shift');
 
+
+        $checkIn = now();
+
+
+
+        $times = $this->calculateTimes(
+
+            $employee,
+
+            $today,
+
+            $checkIn->format('H:i'),
+
+            null
+
+        );
 
 
 
         $attendance->update([
 
+            'check_in'=>$checkIn,
 
-            'check_in'=>now(),
-
+            ...$times
 
         ]);
-
-
-
-
 
 
 
@@ -339,7 +341,6 @@ class AttendanceController extends Controller
             'ورود ثبت شد'
 
         );
-
 
     }
 
@@ -507,9 +508,24 @@ class AttendanceController extends Controller
 
         if(!$employee->shift){
 
+        if($checkOut){
+
+            $start = strtotime(
+                $date.' '.$checkIn
+            );
+
+
+            $end = strtotime(
+                $date.' '.$checkOut
+            );
+
+
             return [
 
-                'worked_minutes'=>0,
+                'worked_minutes'=>max(
+                    0,
+                    intval(($end-$start)/60)
+                ),
 
                 'late_minutes'=>0,
 
@@ -518,6 +534,19 @@ class AttendanceController extends Controller
             ];
 
         }
+
+
+        return [
+
+            'worked_minutes'=>0,
+
+            'late_minutes'=>0,
+
+            'overtime_minutes'=>0,
+
+        ];
+
+    }
 
 
 
