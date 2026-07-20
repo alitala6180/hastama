@@ -8,20 +8,30 @@
 <style>
 
 @font-face {
-
     font-family: 'vazir';
     font-style: normal;
     font-weight: normal;
-    src: url('file://{{ public_path("fonts/Vazir.ttf") }}') format('truetype');
-
+    src: url('file:///{{ str_replace('\\', '/', public_path("fonts/Vazir.ttf")) }}') format('truetype');
 }
 
+html {
+    direction: rtl;
+    unicode-bidi: bidi-override;
+}
 
 body {
     font-family: 'vazir', DejaVu Sans, sans-serif;
     direction: rtl;
+    unicode-bidi: bidi-override;
     text-align: right;
     font-size: 12px;
+}
+
+.ltr {
+    direction: ltr;
+    unicode-bidi: isolate;
+    text-align: left;
+    font-family: 'vazir', DejaVu Sans, sans-serif;
 }
 
 

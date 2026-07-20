@@ -114,16 +114,21 @@ class AttendanceExportController extends Controller
 
         $fontDirs = [public_path('fonts'), storage_path('fonts')];
 
+        $defaultConfig = (new \Mpdf\Config\ConfigVariables())->getDefaults();
+        $defaultFontConfig = (new \Mpdf\Config\FontVariables())->getDefaults();
+
         $mpdf = new \Mpdf\Mpdf([
             'mode' => 'utf-8',
             'format' => 'A4-L',
             'tempDir' => $mpdfTemp,
-            'fontDir' => array_merge((array) \Mpdf\Config\FontVariables::getDefaults()['fontDir'], $fontDirs),
-            'fontdata' => array_merge((array) \Mpdf\Config\FontVariables::getDefaults()['fontdata'], [
-                'vazir' => [
-                    'R' => 'Vazir.ttf'
-                ]
-            ]),
+            'fontDir' => array_merge((array) $defaultConfig['fontDir'], $fontDirs),
+            'fontdata' => array_merge((array) $defaultFontConfig['fontdata'], [
+    'vazir' => [
+        'R' => 'Vazir.ttf',
+        'useOTL' => 0xFF,
+        'useKashida' => 75,
+    ]
+]),
             'default_font' => 'vazir',
         ]);
 
