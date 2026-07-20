@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Leave;
 use App\Models\Employee;
+use App\Models\LeaveBalance;
+use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 use App\Http\Requests\StoreLeaveRequest;
 use App\Http\Requests\UpdateLeaveRequest;
@@ -124,7 +127,6 @@ class LeaveController extends Controller
 
 
 
-
         $data['days'] = $this->calculateDays(
 
             $data['from_date'],
@@ -133,6 +135,46 @@ class LeaveController extends Controller
 
         );
 
+
+
+
+        // بررسی مانده مرخصی سالانه
+
+        if($data['type'] === 'annual'){
+
+
+            $balance = LeaveBalance::firstOrCreate([
+
+                'employee_id'=>$data['employee_id'],
+
+                'year'=>Carbon::parse($data['from_date'])->year,
+
+            ],[
+
+                'annual_days'=>26,
+
+                'used_days'=>0,
+
+            ]);
+
+
+
+            $remaining = $balance->annual_days - $balance->used_days;
+
+
+
+            abort_if(
+
+                $data['days'] > $remaining,
+
+                422,
+
+                'مانده مرخصی کافی نیست'
+
+            );
+
+
+        }
 
 
 
@@ -296,45 +338,99 @@ class LeaveController extends Controller
     public function approve(Leave $leave)
     {
 
-
         abort_unless(
             request()->user()->can('leave.manage'),
             403
         );
 
 
+        DB::transaction(function() use($leave){
+
+
+            $leave->load('employee');
+
+
+            if(
+                $leave->type === 'annual'
+            ){
+
+
+                $year = Carbon::parse(
+                    $leave->from_date
+                )->year;
+
+
+
+                $balance = LeaveBalance::firstOrCreate([
+
+                    'employee_id'=>$leave->employee_id,
+
+                    'year'=>$year,
+
+                ],[
+
+                    'annual_days'=>26,
+
+                    'used_days'=>0,
+
+                ]);
 
 
 
 
 
-        $leave->update([
+                if(
+                    $balance->used_days + $leave->days
+                    >
+                    $balance->annual_days
+                ){
+
+                    abort(
+                        422,
+                        'مانده مرخصی کافی نیست'
+                    );
+
+                }
 
 
-            'status'=>'approved',
-
-
-            'approved_by'=>request()->user()->id,
-
-
-        ]);
 
 
 
+                $balance->increment(
+                    'used_days',
+                    $leave->days
+                );
+
+            }
 
 
 
 
-        return back()
 
-            ->with(
+            $leave->update([
 
-                'success',
 
-                'مرخصی تایید شد'
+                'status'=>'approved',
 
-            );
 
+                'approved_by'=>request()->user()->id,
+
+
+            ]);
+
+
+
+        });
+
+
+
+        return back()->with(
+
+            'success',
+
+            'مرخصی تایید شد'
+
+        );
 
     }
 
@@ -349,45 +445,76 @@ class LeaveController extends Controller
     public function reject(Leave $leave)
     {
 
-
         abort_unless(
             request()->user()->can('leave.manage'),
             403
         );
 
 
+        DB::transaction(function() use($leave){
+
+
+
+            if(
+                $leave->status === 'approved'
+                &&
+                $leave->type === 'annual'
+            ){
+
+
+                $year = Carbon::parse(
+                    $leave->from_date
+                )->year;
+
+
+
+                LeaveBalance::where([
+
+                    'employee_id'=>$leave->employee_id,
+
+                    'year'=>$year,
+
+                ])
+
+                ->decrement(
+
+                    'used_days',
+
+                    $leave->days
+
+                );
+
+
+            }
 
 
 
 
-
-        $leave->update([
-
-
-            'status'=>'rejected',
+            $leave->update([
 
 
-            'approved_by'=>request()->user()->id,
+                'status'=>'rejected',
 
 
-        ]);
+                'approved_by'=>request()->user()->id,
 
+
+            ]);
 
 
 
+        });
 
 
 
-        return back()
 
-            ->with(
+        return back()->with(
 
-                'success',
+            'success',
 
-                'مرخصی رد شد'
+            'مرخصی رد شد'
 
-            );
-
+        );
 
     }
 
@@ -414,7 +541,47 @@ class LeaveController extends Controller
 
 
 
-        $leave->delete();
+        DB::transaction(function() use($leave){
+
+
+            if(
+                $leave->status === 'approved'
+                &&
+                $leave->type === 'annual'
+            ){
+
+
+                $year = Carbon::parse(
+                    $leave->from_date
+                )->year;
+
+
+
+                LeaveBalance::where([
+
+                    'employee_id'=>$leave->employee_id,
+
+                    'year'=>$year,
+
+                ])
+
+                ->decrement(
+
+                    'used_days',
+
+                    $leave->days
+
+                );
+
+
+            }
+
+
+
+            $leave->delete();
+
+
+        });
 
 
 

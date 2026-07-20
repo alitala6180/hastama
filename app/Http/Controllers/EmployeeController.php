@@ -7,6 +7,7 @@ use App\Models\Employee;
 use App\Models\Department;
 use App\Models\Position;
 use App\Models\Shift;
+use App\Models\LeaveBalance;
 
 
 use App\Http\Requests\StoreEmployeeRequest;
@@ -248,11 +249,25 @@ class EmployeeController extends Controller
 
 
 
-        Employee::create(
+        $employee = Employee::create(
 
             $request->validated()
 
         );
+
+
+
+        LeaveBalance::create([
+
+            'employee_id'=>$employee->id,
+
+            'year'=>now()->year,
+
+            'annual_days'=>26,
+
+            'used_days'=>0,
+
+        ]);
 
 
 

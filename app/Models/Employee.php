@@ -11,6 +11,7 @@ use App\Models\Position;
 use App\Models\Shift;
 use App\Models\Leave;
 use App\Models\Attendance;
+use App\Models\LeaveBalance;
 
 
 class Employee extends Model
@@ -157,6 +158,18 @@ class Employee extends Model
 
         return $this->hasMany(
             Leave::class
+        );
+
+    }
+
+    /**
+     * سهمیه های مرخصی
+     */
+    public function leaveBalances()
+    {
+
+        return $this->hasMany(
+            LeaveBalance::class
         );
 
     }
